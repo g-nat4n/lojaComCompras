@@ -90,6 +90,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
+    align-items: stretch
 }
 
         /* CARD */
@@ -99,6 +100,10 @@
             padding: 10px;
             border: 1px solid #eee;
             transition: 0.2s;
+
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .card:hover {
@@ -113,6 +118,7 @@
 
         .card h3 {
             font-size: 16px;
+            min-height: 40px;
         }
 
         .card p {
@@ -121,6 +127,7 @@
         }
 
         .card button {
+            margin-top: auto;
             width: 100%;
             padding: 10px;
             background: #3483fa;
@@ -128,6 +135,61 @@
             border: none;
             cursor: pointer;
         }
+
+        .card img {
+            height: 200px;
+         }
+
+
+/* BADGE */
+.badge {
+    position: absolute;
+    background: red;
+    color: white;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 5px;
+    top: 10px;
+    left: 10px;
+}
+
+/* CARD MELHORADO */
+.card {
+    position: relative;
+}
+
+/* PREÇO */
+.preco {
+    display: flex;
+    flex-direction: column;
+}
+
+.antigo {
+    text-decoration: line-through;
+    color: gray;
+    font-size: 14px;
+}
+
+.atual {
+    color: #00a650;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* FRETE */
+.frete {
+    color: #00a650;
+    font-size: 13px;
+    margin: 5px 0;
+}
+
+/* ESTRELAS */
+.stars {
+    color: #f7b500;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
 
         /* CARRINHO */
       #carrinho {
@@ -257,21 +319,38 @@
         render(produtos);
     }
 
-    function render(lista) {
-        const grid = document.getElementById("produtos");
-        grid.innerHTML = "";
+ function render(lista) {
+    const grid = document.getElementById("produtos");
+    grid.innerHTML = "";
 
-        lista.forEach(p => {
-            grid.innerHTML += `
-                <div class="card">
-                    <img src="http://localhost:8080/uploads/${p.imagem}">
-                    <h3>${p.produto}</h3>
-                    <p>R$ ${p.valor}</p>
-                    <button onclick="add(${p.id})">Adicionar</button>
+    lista.forEach(p => {
+
+        // 🔥 exemplo de desconto fake (só visual)
+        let precoOriginal = p.valor * 1.2;
+
+        grid.innerHTML += `
+            <div class="card">
+
+                <div class="badge">NOVO</div>
+
+                <img src="http://localhost:8080/uploads/${p.imagem}">
+
+                <h3>${p.produto}</h3>
+
+                <div class="preco">
+                    <span class="antigo">R$ ${precoOriginal.toFixed(2)}</span>
+                    <span class="atual">R$ ${p.valor}</span>
                 </div>
-            `;
-        });
-    }
+
+                <div class="frete">🚚 Frete grátis</div>
+
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+
+                <button onclick="add(${p.id})">Adicionar</button>
+            </div>
+        `;
+    });
+}
 
     // 🛒 CARRINHO
 
