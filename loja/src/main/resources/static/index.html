@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Minha Loja</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial;
+            background: #f5f5f5;
+        }
+
+        /* NAVBAR */
+        header {
+            background: #111;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* CARROSSEL */
+        .carousel {
+            width: 80%;
+            height: 300px;
+            margin: 20px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .carousel img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: none;
+        }
+
+        .carousel img.active {
+            display: block;
+        }
+
+        /* DOTS */
+        .dots {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .dot {
+            height: 10px;
+            width: 10px;
+            margin: 5px;
+            background: #ccc;
+            border-radius: 50%;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: #007bff;
+        }
+
+        /* LAYOUT */
+       .main {
+    width: 80%;
+    margin: 0 auto;
+    display: flex;
+    padding: 20px 0;
+}
+
+        /* FILTROS */
+       .sidebar {
+    width: 250px;
+    min-width: 250px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-right: 20px;
+}
+
+        /* PRODUTOS */
+        .content {
+            flex: 1;
+        }
+
+        .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+        /* CARD */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid #eee;
+            transition: 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .card h3 {
+            font-size: 16px;
+        }
+
+        .card p {
+            color: #00a650;
+            font-weight: bold;
+        }
+
+        .card button {
+            width: 100%;
+            padding: 10px;
+            background: #3483fa;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* CARRINHO */
+      #carrinho {
+    position: fixed;
+    right: -350px; /* 🔥 começa escondido */
+    top: 0;
+    width: 320px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+    padding: 20px;
+    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000; /* 🔥 garante que fica acima */
+}
+
+#carrinho.ativo {
+    right: 0;
+}
+
+        .carrinho-header {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        .total {
+    margin-top: 20px; /* 🔥 sobe pra perto dos itens */
+    font-size: 18px;
+    font-weight: bold;
+}
+
+        .btn-comprar {
+    margin-top: 10px;
+    padding: 12px;
+    background: #00a650;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+        /* FOOTER (🔥 corrigido) */
+        footer {
+            background: #111;
+            color: white;
+            padding: 30px;
+            margin-top: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🛍️ Minha Loja</h2>
+    <div onclick="toggleCarrinho()">🛒 (<span id="qtd">0</span>)</div>
+</header>
+
+<!-- CARROSSEL -->
+<div class="carousel">
+    <img src="uploads/banner 5.jpg" class="active">
+    <img src="uploads/banner 6.jpg">
+    <img src="uploads/banner 7.jpg">
+    <img src="uploads/banner 8.jpg">
+    <div class="dots"></div>
+</div>
+
+<div class="main">
+
+    <div class="sidebar">
+        <h3>Filtros</h3>
+        <input type="number" id="filtroPreco">
+        <button onclick="filtrar()">Filtrar</button>
+    </div>
+
+    <div class="content">
+        <div class="grid" id="produtos"></div>
+    </div>
+
+</div>
+
+<!-- CARRINHO -->
+<div id="carrinho">
+    <div class="carrinho-header">
+        <h3>🛒 Carrinho</h3>
+        <span onclick="toggleCarrinho()">✖</span>
+    </div>
+
+    <div id="itens"></div>
+
+    <div class="total">
+        Total: R$ <span id="total">0</span>
+    </div>
+
+    <button class="btn-comprar" onclick="comprar()">Comprar</button>
+</div>
+
+<footer>
+    <p>Minha Loja © 2026</p>
+    <p>contato@minhaloja.com</p>
+</footer>
+
+
+<script>
+    let produtosGlobais = [];
+    let carrinho = [];
+
+    // INIT
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("carrinho").classList.remove("ativo");
+        carregarProdutos();
+    });
+
+    // PRODUTOS
+    async function carregarProdutos() {
+        const res = await fetch("http://localhost:8080/produtos");
+        const produtos = await res.json();
+
+        produtosGlobais = produtos;
+        render(produtos);
+    }
+
+    function render(lista) {
+        const grid = document.getElementById("produtos");
+        grid.innerHTML = "";
+
+        lista.forEach(p => {
+            grid.innerHTML += `
+                <div class="card">
+                    <img src="http://localhost:8080/uploads/${p.imagem}">
+                    <h3>${p.produto}</h3>
+                    <p>R$ ${p.valor}</p>
+                    <button onclick="add(${p.id})">Adicionar</button>
+                </div>
+            `;
+        });
+    }
+
+    // 🛒 CARRINHO
+
+    function add(id) {
+        const produto = produtosGlobais.find(p => p.id === id);
+
+        // 🔥 se já existe, só aumenta qtd
+        const existente = carrinho.find(p => p.id === id);
+
+        if (existente) {
+            existente.qtd++;
+        } else {
+            carrinho.push({ ...produto, qtd: 1 });
+        }
+
+        atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+        const itens = document.getElementById("itens");
+        const totalEl = document.getElementById("total");
+        const qtd = document.getElementById("qtd");
+
+        itens.innerHTML = "";
+        let total = 0;
+
+        carrinho.forEach((p, index) => {
+            itens.innerHTML += `
+                <div class="item" style="display:flex; gap:10px; align-items:center;">
+
+                    <img src="http://localhost:8080/uploads/${p.imagem}"
+                         style="width:50px; height:50px; object-fit:cover; border-radius:5px">
+
+                    <div style="flex:1;">
+                        <div><strong>${p.produto}</strong></div>
+                        <div>R$ ${p.valor}</div>
+
+                        <div style="margin-top:5px;">
+                            <button onclick="diminuir(${index})">-</button>
+                            ${p.qtd}
+                            <button onclick="aumentar(${index})">+</button>
+                        </div>
+                    </div>
+
+                    <button onclick="remover(${index})"
+                        style="background:red;color:white;border:none;padding:5px;border-radius:4px;">
+                        X
+                    </button>
+                </div>
+            `;
+
+            total += p.valor * p.qtd;
+        });
+
+        totalEl.innerText = total.toFixed(2);
+        qtd.innerText = carrinho.reduce((s, p) => s + p.qtd, 0);
+    }
+
+    // ➕ quantidade
+    function aumentar(index) {
+        carrinho[index].qtd++;
+        atualizarCarrinho();
+    }
+
+    // ➖ quantidade
+    function diminuir(index) {
+        carrinho[index].qtd--;
+
+        if (carrinho[index].qtd <= 0) {
+            carrinho.splice(index, 1);
+        }
+
+        atualizarCarrinho();
+    }
+
+    // ❌ remover
+    function remover(index) {
+        carrinho.splice(index, 1);
+        atualizarCarrinho();
+    }
+
+    // abrir/fechar carrinho
+    function toggleCarrinho() {
+        document.getElementById("carrinho").classList.toggle("ativo");
+    }
+
+    // FILTRO
+    function filtrar() {
+        const preco = document.getElementById("filtroPreco").value;
+
+        const filtrados = produtosGlobais.filter(p =>
+            !preco || p.valor <= preco
+        );
+
+        render(filtrados);
+    }
+
+    // 💳 PAGAMENTO (corrigido com qtd)
+    async function comprar() {
+        if (carrinho.length === 0) {
+            alert("Carrinho vazio!");
+            return;
+        }
+
+        let total = carrinho.reduce((s, p) => s + (p.valor * p.qtd), 0);
+
+        const res = await fetch("http://localhost:8080/pagamentos", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ valor: total })
+        });
+
+        const link = await res.text();
+        window.location.href = link;
+    }
+
+    // 🎠 CARROSSEL
+    let index = 0;
+    const imagens = document.querySelectorAll(".carousel img");
+    const dotsContainer = document.querySelector(".dots");
+
+    imagens.forEach((_, i) => {
+        const dot = document.createElement("span");
+        dot.classList.add("dot");
+
+        if (i === 0) dot.classList.add("active");
+
+        dot.onclick = () => trocarSlide(i);
+        dotsContainer.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll(".dot");
+
+    function trocarSlide(i) {
+        imagens[index].classList.remove("active");
+        dots[index].classList.remove("active");
+
+        index = i;
+
+        imagens[index].classList.add("active");
+        dots[index].classList.add("active");
+    }
+
+    setInterval(() => {
+        trocarSlide((index + 1) % imagens.length);
+    }, 3000);
+
+</script>
+
+</body>
+</html>

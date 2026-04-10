@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Cadastro</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e2f, #2c2c54);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0,123,255,0.3);
+        }
+
+        input[type="file"] {
+            border: none;
+        }
+
+        .preview {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .preview img {
+            max-width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>📦 Novo Produto</h2>
+
+    <div class="input-group">
+        <label>Nome</label>
+        <input type="text" id="nome">
+    </div>
+
+    <div class="input-group">
+        <label>Preço</label>
+        <input type="number" id="preco">
+    </div>
+
+    <div class="input-group">
+        <label>Imagem</label>
+        <input type="file" id="imagem" onchange="previewImagem()">
+    </div>
+
+    <div class="preview">
+        <img id="imgPreview">
+    </div>
+
+    <button onclick="cadastrar()">Cadastrar</button>
+</div>
+
+<script>
+    function previewImagem() {
+        const file = document.getElementById("imagem").files[0];
+        const preview = document.getElementById("imgPreview");
+
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = "block";
+        }
+    }
+
+    async function cadastrar() {
+
+        const formData = new FormData();
+
+        formData.append("nome", document.getElementById("nome").value);
+        formData.append("preco", document.getElementById("preco").value);
+        formData.append("imagem", document.getElementById("imagem").files[0]);
+
+        await fetch("http://localhost:8080/produtos/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        alert("Produto cadastrado!");
+    }
+</script>
+
+</body>
+</html>
