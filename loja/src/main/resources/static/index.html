@@ -89,7 +89,7 @@
         .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    gap: 40px 20px;
     align-items: stretch
 }
 
@@ -104,6 +104,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            margin-bottom: 5px;
         }
 
         .card:hover {
@@ -252,7 +253,7 @@
 
 <header>
     <h2>🛍️ Minha Loja</h2>
-    <div onclick="toggleCarrinho()">🛒 (<span id="qtd">0</span>)</div>
+    <div id="iconeCarrinho" onclick="toggleCarrinho()">🛒 (<span id="qtd">0</span>)</div>
 </header>
 
 <!-- CARROSSEL -->
@@ -346,7 +347,7 @@
 
                 <div class="stars">⭐⭐⭐⭐⭐</div>
 
-                <button onclick="add(${p.id})">Adicionar</button>
+                <button onclick="add(${p.id}, event)">Adicionar</button>
             </div>
         `;
     });
@@ -354,20 +355,56 @@
 
     // 🛒 CARRINHO
 
-    function add(id) {
-        const produto = produtosGlobais.find(p => p.id === id);
+  function add(id, event) {
+    const produto = produtosGlobais.find(p => p.id === id);
 
-        // 🔥 se já existe, só aumenta qtd
-        const existente = carrinho.find(p => p.id === id);
+    const existente = carrinho.find(p => p.id === id);
 
-        if (existente) {
-            existente.qtd++;
-        } else {
-            carrinho.push({ ...produto, qtd: 1 });
-        }
-
-        atualizarCarrinho();
+    if (existente) {
+        existente.qtd++;
+    } else {
+        carrinho.push({ ...produto, qtd: 1 });
     }
+
+    animarProduto(event);
+    atualizarCarrinho();
+}
+
+function animarProduto(event) {
+    const botao = event.target;
+    const card = botao.closest(".card");
+    const img = card.querySelector("img");
+
+    const carrinho = document.getElementById("iconeCarrinho");
+
+    const imgRect = img.getBoundingClientRect();
+    const carrinhoRect = carrinho.getBoundingClientRect();
+
+    const clone = img.cloneNode(true);
+
+    clone.style.position = "fixed";
+    clone.style.top = imgRect.top + "px";
+    clone.style.left = imgRect.left + "px";
+    clone.style.width = imgRect.width + "px";
+    clone.style.height = imgRect.height + "px";
+    clone.style.transition = "all 0.8s ease";
+    clone.style.zIndex = "2000";
+    clone.style.borderRadius = "10px";
+
+    document.body.appendChild(clone);
+
+    setTimeout(() => {
+        clone.style.top = carrinhoRect.top + "px";
+        clone.style.left = carrinhoRect.left + "px";
+        clone.style.width = "30px";
+        clone.style.height = "30px";
+        clone.style.opacity = "0.5";
+    }, 10);
+
+    setTimeout(() => {
+        clone.remove();
+    }, 800);
+}
 
     function atualizarCarrinho() {
         const itens = document.getElementById("itens");
