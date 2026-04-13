@@ -82,6 +82,7 @@
 <div class="container">
     <h2>📝 Cadastro</h2>
 
+    <input type="text" id="nome" placeholder="Nome">
     <input type="email" id="email" placeholder="Email">
     <input type="password" id="senha" placeholder="Senha">
 
@@ -92,13 +93,17 @@
 
 <script>
     async function registrar() {
+
+        const usuario = {
+            nome: document.getElementById("nome").value,
+            email: document.getElementById("email").value,
+            senha: document.getElementById("senha").value
+        };
+
         await fetch("/auth/register", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                email: document.getElementById("email").value,
-                senha: document.getElementById("senha").value
-            })
+            body: JSON.stringify(usuario)
         });
 
         alert("Cadastro realizado!");

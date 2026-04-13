@@ -341,6 +341,36 @@ header {
 .link-login:active {
     transform: scale(0.95);
 }
+
+        /* usuário logado */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #6c63ff; /* mesma cor do hover do login */
+    font-weight: 600;
+}
+
+/* botão sair */
+.btn-logout {
+    padding: 6px 12px;
+    border: 2px solid #ff4d4d;
+    background: transparent;
+    color: #ff4d4d;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-logout:hover {
+    background: #ff4d4d;
+    color: white;
+}
+
+.btn-logout:active {
+    transform: scale(0.95);
+}
     </style>
 </head>
 
@@ -461,29 +491,31 @@ header {
     // =====================
     // LOGIN STATUS
     // =====================
-    async function verificarLogin(){
-        if(!isLogado()) return;
+ async function verificarLogin(){
+    if(!isLogado()) return;
 
-        try {
-            const res = await fetch(API + "/auth/me", {
-                headers: {
-                    "Authorization": "Bearer " + getToken()
-                }
-            });
+    try {
+        const res = await fetch(API + "/auth/me", {
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            }
+        });
 
-            if(!res.ok) throw new Error();
+        if(!res.ok) throw new Error();
 
-                const nome = await res.text();
+        const email = await res.text();
 
-            document.getElementById("userArea").innerHTML = `
-                <span style="margin-right:10px;">👤 ${email}</span>
-                <button onclick="logout()" style="cursor:pointer;">Sair</button>
-            `;
+        document.getElementById("userArea").innerHTML = `
+            <div class="user-info">
+                👤 <span>${email}</span>
+                <button class="btn-logout" onclick="logout()">Sair</button>
+            </div>
+        `;
 
-        } catch(e){
-            logout();
-        }
+    } catch(e){
+        logout();
     }
+}
 
     // =====================
     // PRODUTOS
