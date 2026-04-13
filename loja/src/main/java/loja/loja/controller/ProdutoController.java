@@ -1,15 +1,15 @@
 package loja.loja.controller;
 
-import loja.loja.entity.Produto;
-import loja.loja.repository.ProdutoRepository;
+import loja.loja.entity.*;
+import loja.loja.repository.*;
 import loja.loja.service.ProdutoService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication; // ✅ CORRETO
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.List;
 
 @RestController
@@ -17,11 +17,17 @@ import java.util.List;
 public class ProdutoController {
 
     @Autowired
-    private ProdutoRepository repository;
-
+    private ProdutoRepository produtoRepository;
 
     @Autowired
     private ProdutoService service;
+
+    @Autowired
+    private CarrinhoRepository carrinhoRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
 
     @PostMapping
     public Produto cadastrar(@RequestBody Produto produto) {
@@ -52,6 +58,29 @@ public class ProdutoController {
         produto.setValor(preco);
         produto.setImagem(nomeArquivo);
 
-        return repository.save(produto);
+        return produtoRepository.save(produto);
+    }
+
+
+
+    @PostMapping("/carrinho/adicionar/{produtoId}")
+    public void adicionar(@PathVariable Long produtoId, Authentication auth) {
+
+        String email = auth.getName();
+
+        Usuario usuario = usuarioRepository.findByEmail(email);
+
+        Carrinho carrinho = usuario.getCarrinho();
+
+        Produto produto = produtoRepository.findById(produtoId).orElseThrow();
+
+        ItemCarrinho item = new ItemCarrinho();
+        item.setProduto(produto);
+        item.setQuantidade(1);
+        item.setCarrinho(carrinho);
+
+        carrinho.getItens().add(item);
+
+        carrinhoRepository.save(carrinho);
     }
 }

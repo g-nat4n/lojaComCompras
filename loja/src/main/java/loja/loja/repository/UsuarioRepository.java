@@ -1,8 +1,8 @@
 package loja.loja.repository;
 
-import loja.loja.entity.Produto;
 import loja.loja.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProdutoRepository extends JpaRepository<Produto, Long> {
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+    Usuario findByEmail(String email);
 }

@@ -320,6 +320,27 @@ header {
             text-align: center;
         }
 
+
+        .link-login {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 2px solid #6c63ff;
+    color: #6c63ff;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+/* hover bonito */
+.link-login:hover {
+    background: #6c63ff;
+    color: white;
+}
+
+/* efeito clique */
+.link-login:active {
+    transform: scale(0.95);
+}
     </style>
 </head>
 
@@ -336,8 +357,20 @@ header {
             </div>
         </div>
 
-        <div id="iconeCarrinho" onclick="toggleCarrinho()">
-            🛒 (<span id="qtd">0</span>)
+        <div style="display: flex; gap: 15px; align-items: center;">
+
+            <!-- LOGIN / USER -->
+            <div id="userArea">
+                <a href="/login.html" class="link-login">
+                    👤 Login
+                </a>
+            </div>
+
+            <!-- CARRINHO -->
+            <div id="iconeCarrinho" onclick="toggleCarrinho()" style="cursor:pointer;">
+                🛒 (<span id="qtd">0</span>)
+            </div>
+
         </div>
     </div>
 
@@ -397,106 +430,160 @@ header {
     let produtosGlobais = [];
     let carrinho = [];
 
+    const API = "http://localhost:8080";
+
+    // =====================
+    // TOKEN
+    // =====================
+    function getToken(){
+        return localStorage.getItem("token");
+    }
+
+    function isLogado(){
+        return !!getToken();
+    }
+
+    function logout(){
+        localStorage.removeItem("token");
+        location.reload();
+    }
+
+    // =====================
     // INIT
+    // =====================
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("carrinho").classList.remove("ativo");
+
+        verificarLogin();
         carregarProdutos();
     });
 
+    // =====================
+    // LOGIN STATUS
+    // =====================
+    async function verificarLogin(){
+        if(!isLogado()) return;
+
+        try {
+            const res = await fetch(API + "/auth/me", {
+                headers: {
+                    "Authorization": "Bearer " + getToken()
+                }
+            });
+
+            if(!res.ok) throw new Error();
+
+                const nome = await res.text();
+
+            document.getElementById("userArea").innerHTML = `
+                <span style="margin-right:10px;">👤 ${email}</span>
+                <button onclick="logout()" style="cursor:pointer;">Sair</button>
+            `;
+
+        } catch(e){
+            logout();
+        }
+    }
+
+    // =====================
     // PRODUTOS
+    // =====================
     async function carregarProdutos() {
-        const res = await fetch("http://localhost:8080/produtos");
+        const res = await fetch(API + "/produtos");
         const produtos = await res.json();
 
         produtosGlobais = produtos;
         render(produtos);
     }
 
- function render(lista) {
-    const grid = document.getElementById("produtos");
-    grid.innerHTML = "";
+    function render(lista) {
+        const grid = document.getElementById("produtos");
+        grid.innerHTML = "";
 
-    lista.forEach(p => {
+        lista.forEach(p => {
 
-        // 🔥 exemplo de desconto fake (só visual)
-        let precoOriginal = p.valor * 1.2;
+            let precoOriginal = p.valor * 1.2;
 
-        grid.innerHTML += `
-            <div class="card">
+            grid.innerHTML += `
+                <div class="card">
 
-                <div class="badge">NOVO</div>
+                    <div class="badge">NOVO</div>
 
-                <img src="http://localhost:8080/uploads/${p.imagem}">
+                    <img src="${API}/uploads/${p.imagem}">
 
-                <h3>${p.produto}</h3>
+                    <h3>${p.produto}</h3>
 
-                <div class="preco">
-                    <span class="antigo">R$ ${precoOriginal.toFixed(2)}</span>
-                    <span class="atual">R$ ${p.valor}</span>
+                    <div class="preco">
+                        <span class="antigo">R$ ${precoOriginal.toFixed(2)}</span>
+                        <span class="atual">R$ ${p.valor}</span>
+                    </div>
+
+                    <div class="frete">🚚 Frete grátis</div>
+
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+
+                    <button onclick="add(${p.id}, event)">Adicionar</button>
                 </div>
-
-                <div class="frete">🚚 Frete grátis</div>
-
-                <div class="stars">⭐⭐⭐⭐⭐</div>
-
-                <button onclick="add(${p.id}, event)">Adicionar</button>
-            </div>
-        `;
-    });
-}
-
-    // 🛒 CARRINHO
-
-  function add(id, event) {
-    const produto = produtosGlobais.find(p => p.id === id);
-
-    const existente = carrinho.find(p => p.id === id);
-
-    if (existente) {
-        existente.qtd++;
-    } else {
-        carrinho.push({ ...produto, qtd: 1 });
+            `;
+        });
     }
 
-    animarProduto(event);
-    atualizarCarrinho();
-}
+    // =====================
+    // CARRINHO
+    // =====================
+    function add(id, event) {
 
-function animarProduto(event) {
-    const botao = event.target;
-    const card = botao.closest(".card");
-    const img = card.querySelector("img");
+        if(!isLogado()){
+            alert("Faça login para adicionar ao carrinho!");
+            window.location.href = "/login.html";
+            return;
+        }
 
-    const carrinho = document.getElementById("iconeCarrinho");
+        const produto = produtosGlobais.find(p => p.id === id);
+        const existente = carrinho.find(p => p.id === id);
 
-    const imgRect = img.getBoundingClientRect();
-    const carrinhoRect = carrinho.getBoundingClientRect();
+        if (existente) {
+            existente.qtd++;
+        } else {
+            carrinho.push({ ...produto, qtd: 1 });
+        }
 
-    const clone = img.cloneNode(true);
+        animarProduto(event);
+        atualizarCarrinho();
+    }
 
-    clone.style.position = "fixed";
-    clone.style.top = imgRect.top + "px";
-    clone.style.left = imgRect.left + "px";
-    clone.style.width = imgRect.width + "px";
-    clone.style.height = imgRect.height + "px";
-    clone.style.transition = "all 0.8s ease";
-    clone.style.zIndex = "2000";
-    clone.style.borderRadius = "10px";
+    function animarProduto(event) {
+        const botao = event.target;
+        const card = botao.closest(".card");
+        const img = card.querySelector("img");
 
-    document.body.appendChild(clone);
+        const carrinhoIcon = document.getElementById("iconeCarrinho");
 
-    setTimeout(() => {
-        clone.style.top = carrinhoRect.top + "px";
-        clone.style.left = carrinhoRect.left + "px";
-        clone.style.width = "30px";
-        clone.style.height = "30px";
-        clone.style.opacity = "0.5";
-    }, 10);
+        const imgRect = img.getBoundingClientRect();
+        const carrinhoRect = carrinhoIcon.getBoundingClientRect();
 
-    setTimeout(() => {
-        clone.remove();
-    }, 800);
-}
+        const clone = img.cloneNode(true);
+
+        clone.style.position = "fixed";
+        clone.style.top = imgRect.top + "px";
+        clone.style.left = imgRect.left + "px";
+        clone.style.width = imgRect.width + "px";
+        clone.style.height = imgRect.height + "px";
+        clone.style.transition = "all 0.8s ease";
+        clone.style.zIndex = "2000";
+
+        document.body.appendChild(clone);
+
+        setTimeout(() => {
+            clone.style.top = carrinhoRect.top + "px";
+            clone.style.left = carrinhoRect.left + "px";
+            clone.style.width = "30px";
+            clone.style.height = "30px";
+            clone.style.opacity = "0.5";
+        }, 10);
+
+        setTimeout(() => clone.remove(), 800);
+    }
 
     function atualizarCarrinho() {
         const itens = document.getElementById("itens");
@@ -509,15 +596,14 @@ function animarProduto(event) {
         carrinho.forEach((p, index) => {
             itens.innerHTML += `
                 <div class="item" style="display:flex; gap:10px; align-items:center;">
-
-                    <img src="http://localhost:8080/uploads/${p.imagem}"
+                    <img src="${API}/uploads/${p.imagem}"
                          style="width:50px; height:50px; object-fit:cover; border-radius:5px">
 
                     <div style="flex:1;">
                         <div><strong>${p.produto}</strong></div>
                         <div>R$ ${p.valor}</div>
 
-                        <div style="margin-top:5px;">
+                        <div>
                             <button onclick="diminuir(${index})">-</button>
                             ${p.qtd}
                             <button onclick="aumentar(${index})">+</button>
@@ -525,7 +611,7 @@ function animarProduto(event) {
                     </div>
 
                     <button onclick="remover(${index})"
-                        style="background:red;color:white;border:none;padding:5px;border-radius:4px;">
+                        style="background:red;color:white;border:none;padding:5px;">
                         X
                     </button>
                 </div>
@@ -538,95 +624,48 @@ function animarProduto(event) {
         qtd.innerText = carrinho.reduce((s, p) => s + p.qtd, 0);
     }
 
-    // ➕ quantidade
-    function aumentar(index) {
-        carrinho[index].qtd++;
+    function aumentar(i){ carrinho[i].qtd++; atualizarCarrinho(); }
+    function diminuir(i){
+        carrinho[i].qtd--;
+        if(carrinho[i].qtd <= 0) carrinho.splice(i,1);
         atualizarCarrinho();
     }
+    function remover(i){ carrinho.splice(i,1); atualizarCarrinho(); }
 
-    // ➖ quantidade
-    function diminuir(index) {
-        carrinho[index].qtd--;
-
-        if (carrinho[index].qtd <= 0) {
-            carrinho.splice(index, 1);
-        }
-
-        atualizarCarrinho();
-    }
-
-    // ❌ remover
-    function remover(index) {
-        carrinho.splice(index, 1);
-        atualizarCarrinho();
-    }
-
-    // abrir/fechar carrinho
-    function toggleCarrinho() {
+    function toggleCarrinho(){
         document.getElementById("carrinho").classList.toggle("ativo");
     }
 
-    // FILTRO
-    function filtrar() {
-        const preco = document.getElementById("filtroPreco").value;
-
-        const filtrados = produtosGlobais.filter(p =>
-            !preco || p.valor <= preco
-        );
-
-        render(filtrados);
-    }
-
-    // 💳 PAGAMENTO (corrigido com qtd)
+    // =====================
+    // COMPRA
+    // =====================
     async function comprar() {
+
+        if (!isLogado()) {
+            alert("Faça login!");
+            window.location.href = "/login.html";
+            return;
+        }
+
         if (carrinho.length === 0) {
             alert("Carrinho vazio!");
             return;
         }
 
-        let total = carrinho.reduce((s, p) => s + (p.valor * p.qtd), 0);
+        let total = carrinho.reduce((s, p) => s + p.valor * p.qtd, 0);
 
-        const res = await fetch("http://localhost:8080/pagamentos", {
+        const res = await fetch(API + "/pagamentos", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + getToken()
+            },
             body: JSON.stringify({ valor: total })
         });
 
         const link = await res.text();
         window.location.href = link;
     }
-
-    // 🎠 CARROSSEL
-    let index = 0;
-    const imagens = document.querySelectorAll(".carousel img");
-    const dotsContainer = document.querySelector(".dots");
-
-    imagens.forEach((_, i) => {
-        const dot = document.createElement("span");
-        dot.classList.add("dot");
-
-        if (i === 0) dot.classList.add("active");
-
-        dot.onclick = () => trocarSlide(i);
-        dotsContainer.appendChild(dot);
-    });
-
-    const dots = document.querySelectorAll(".dot");
-
-    function trocarSlide(i) {
-        imagens[index].classList.remove("active");
-        dots[index].classList.remove("active");
-
-        index = i;
-
-        imagens[index].classList.add("active");
-        dots[index].classList.add("active");
-    }
-
-    setInterval(() => {
-        trocarSlide((index + 1) % imagens.length);
-    }, 3000);
-
 </script>
 
 </body>
