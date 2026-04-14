@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Produto</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        header {
+            background: #111;
+            color: white;
+            padding: 10px 30px;
+        }
+
+        .topo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .busca {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .input-busca {
+            position: relative;
+            width: 60%;
+            max-width: 400px;
+        }
+
+        .input-busca input {
+            width: 100%;
+            height: 40px;
+            border-radius: 20px;
+            border: none;
+            text-align: center;
+        }
+
+        .input-busca button {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            height: 30px;
+            width: 30px;
+            border: none;
+            background: #3483fa;
+            color: white;
+            border-radius: 50%;
+        }
+
+        .menu {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 10px;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .menu a:hover {
+            color: #00c3ff;
+        }
+
+        /* LOGIN */
+        .link-login {
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #6c63ff;
+            color: #6c63ff;
+        }
+
+        .link-login:hover {
+            background: #6c63ff;
+            color: white;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 10px;
+            color: #6c63ff;
+        }
+
+        .btn-logout {
+            border: 2px solid red;
+            background: transparent;
+            color: red;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* PRODUTO */
+        .container {
+            width: 90%;
+            margin: 30px auto;
+        }
+
+        .produto-box {
+            display: flex;
+            gap: 30px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        /* MINIATURAS */
+        .miniaturas {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .miniaturas img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        /* IMAGEM */
+        .imagem img {
+            width: 400px;
+        }
+
+        /* INFO */
+        .info {
+            flex: 1;
+        }
+
+        .info h1 {
+            font-size: 24px;
+        }
+
+        .preco {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .parcelas {
+            color: #00a650;
+        }
+
+        /* COMPRA */
+        .compra-box {
+            width: 300px;
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .comprar {
+            background: #3483fa;
+            color: white;
+        }
+
+        .carrinho-btn {
+            background: #e3edfb;
+            color: #3483fa;
+            font-weight: bold;
+        }
+
+        /* FOOTER */
+        footer {
+            margin-top: auto;
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="topo">
+        <h2>🛍️ Minha Loja</h2>
+
+        <div class="busca">
+            <div class="input-busca">
+                <input placeholder="Buscar produtos...">
+                <button>🔍</button>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:15px;">
+            <div id="userArea">
+                <a href="/login.html" class="link-login">Login</a>
+            </div>
+
+            <div>🛒 <span id="qtd">0</span></div>
+        </div>
+    </div>
+
+    <nav class="menu">
+        <a href="/index.html">Início</a>
+        <a href="/contato.html">Contato</a>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="produto-box">
+
+        <div class="miniaturas">
+            <img id="thumb1">
+            <img id="thumb2">
+            <img id="thumb3">
+        </div>
+
+        <div class="imagem">
+            <img id="imagem">
+        </div>
+
+        <div class="info">
+            <h1 id="nome"></h1>
+            <div class="preco" id="preco"></div>
+            <div class="parcelas" id="parcelas"></div>
+        </div>
+
+        <div class="compra-box">
+            <p style="color:green;">Frete grátis</p>
+
+            <button class="btn comprar" onclick="comprarAgora()">
+                Comprar agora
+            </button>
+
+            <button class="btn carrinho-btn" onclick="addCarrinho()">
+                Adicionar ao carrinho
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+    Minha Loja © 2026
+</footer>
+
+<script>
+    const API = "http://localhost:8080";
+    const id = new URLSearchParams(window.location.search).get("id");
+
+    let produtoAtual = null;
+
+    // =====================
+    // AUTH PADRÃO (🔥 NOVO)
+    // =====================
+    function authHeader() {
+        const token = localStorage.getItem("token");
+        return token ? { "Authorization": "Bearer " + token } : {};
+    }
+
+    function isLogado() {
+        return !!localStorage.getItem("token");
+    }
+
+    function logout() {
+        localStorage.removeItem("token");
+        location.reload();
+    }
+
+    // =====================
+    // LOGIN HEADER
+    // =====================
+    async function verificarLogin() {
+        if (!isLogado()) return;
+
+        try {
+            const res = await fetch(API + "/auth/me", {
+                headers: authHeader()
+            });
+
+            if (!res.ok) throw new Error();
+
+            const email = await res.text();
+
+            document.getElementById("userArea").innerHTML = `
+                <div class="user-info">
+                    👤 <span>${email}</span>
+                    <button class="btn-logout" onclick="logout()">Sair</button>
+                </div>
+            `;
+
+        } catch (e) {
+            logout();
+        }
+    }
+
+    // =====================
+    // PRODUTO
+    // =====================
+    fetch(`${API}/produtos/${id}`)
+    .then(res => res.json())
+    .then(p => {
+        produtoAtual = p;
+
+        document.getElementById("nome").innerText = p.produto;
+        document.getElementById("preco").innerText = "R$ " + p.valor;
+
+        let parcela = (p.valor / 12).toFixed(2);
+        document.getElementById("parcelas").innerText =
+            `12x de R$ ${parcela}`;
+
+        let img = `${API}/uploads/${p.imagem}`;
+
+        document.getElementById("imagem").src = img;
+        document.getElementById("thumb1").src = img;
+        document.getElementById("thumb2").src = img;
+        document.getElementById("thumb3").src = img;
+    });
+
+    // =====================
+    // CARRINHO
+    // =====================
+    async function carregarCarrinho() {
+        if (!isLogado()) return;
+
+        const res = await fetch(API + "/carrinho", {
+            headers: authHeader()
+        });
+
+        if (!res.ok) return;
+
+        const carrinho = await res.json();
+
+        let totalQtd = 0;
+
+        carrinho?.itens?.forEach(i => {
+            totalQtd += i.quantidade;
+        });
+
+        document.getElementById("qtd").innerText = totalQtd;
+    }
+
+    // =====================
+    // AÇÕES
+    // =====================
+    async function addCarrinho() {
+        if (!isLogado()) {
+            window.location.href = "/login.html";
+            return;
+        }
+
+        await fetch(API + "/carrinho/adicionar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...authHeader()
+            },
+            body: JSON.stringify({
+                produtoId: produtoAtual.id,
+                quantidade: 1
+            })
+        });
+
+        await carregarCarrinho(); // 🔥 ATUALIZA
+        alert("Adicionado ao carrinho!");
+    }
+
+    async function comprarAgora() {
+        if (!isLogado()) {
+            window.location.href = "/login.html";
+            return;
+        }
+
+        const pagamento = await fetch(API + "/pagamentos", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...authHeader()
+            },
+            body: JSON.stringify({ valor: produtoAtual.valor })
+        });
+
+        const link = await pagamento.text();
+        window.location.href = link;
+    }
+
+    // INIT
+    verificarLogin();
+    carregarCarrinho();
+</script>
+
+</body>
+</html>

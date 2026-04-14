@@ -1,12 +1,17 @@
 package loja.loja.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
+
+    @Autowired
+    private JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -16,15 +21,21 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/**",
-                                "/produtos",
+                                "/produtos/**",
                                 "/uploads/**",
                                 "/",
                                 "/index.html",
                                 "/login.html",
-                                "/registro.html"
+                                "/produto.html",
+                                "/carrinho/**",
+                                "/registro.html",
+                                "/favicon.ico"
                         ).permitAll()
+                        .requestMatchers("/favicon.ico").permitAll()
+                        .requestMatchers("/carrinho/**").permitAll()
                         .anyRequest().authenticated()
-                );
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

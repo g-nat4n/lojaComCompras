@@ -455,25 +455,24 @@ header {
     <p>contato@minhaloja.com</p>
 </footer>
 
-
 <script>
+
     let produtosGlobais = [];
-    let carrinho = [];
 
     const API = "http://localhost:8080";
 
     // =====================
     // TOKEN
     // =====================
-    function getToken(){
+    function getToken() {
         return localStorage.getItem("token");
     }
 
-    function isLogado(){
+    function isLogado() {
         return !!getToken();
     }
 
-    function logout(){
+    function logout() {
         localStorage.removeItem("token");
         location.reload();
     }
@@ -486,46 +485,50 @@ header {
 
         verificarLogin();
         carregarProdutos();
+        carregarCarrinho();
     });
 
     // =====================
-    // LOGIN STATUS
+    // LOGIN
     // =====================
- async function verificarLogin(){
-    if(!isLogado()) return;
+    async function verificarLogin() {
+        if (!isLogado()) return;
 
-    try {
-        const res = await fetch(API + "/auth/me", {
-            headers: {
-                "Authorization": "Bearer " + getToken()
-            }
-        });
+        try {
+            const res = await fetch(API + "/auth/me", {
+                headers: {
+                    "Authorization": "Bearer " + getToken()
+                }
+            });
 
-        if(!res.ok) throw new Error();
+            if (!res.ok) throw new Error();
 
-        const email = await res.text();
+            const email = await res.text();
 
-        document.getElementById("userArea").innerHTML = `
-            <div class="user-info">
-                👤 <span>${email}</span>
-                <button class="btn-logout" onclick="logout()">Sair</button>
-            </div>
-        `;
+            document.getElementById("userArea").innerHTML = `
+                <div class="user-info">
+                    👤 <span>${email}</span>
+                    <button class="btn-logout" onclick="logout()">Sair</button>
+                </div>
+            `;
 
-    } catch(e){
-        logout();
+        } catch (e) {
+            logout();
+        }
     }
-}
 
     // =====================
     // PRODUTOS
     // =====================
     async function carregarProdutos() {
         const res = await fetch(API + "/produtos");
-        const produtos = await res.json();
+        produtosGlobais = await res.json();
+        render(produtosGlobais);
+    }
 
-        produtosGlobais = produtos;
-        render(produtos);
+    // 🔥 NOVO: abrir página do produto
+    function abrirProduto(id) {
+        window.location.href = `produto.html?id=${id}`;
     }
 
     function render(lista) {
@@ -537,8 +540,7 @@ header {
             let precoOriginal = p.valor * 1.2;
 
             grid.innerHTML += `
-                <div class="card">
-
+                <div class="card" onclick="abrirProduto(${p.id})" style="cursor:pointer;">
                     <div class="badge">NOVO</div>
 
                     <img src="${API}/uploads/${p.imagem}">
@@ -551,10 +553,12 @@ header {
                     </div>
 
                     <div class="frete">🚚 Frete grátis</div>
-
                     <div class="stars">⭐⭐⭐⭐⭐</div>
 
-                    <button onclick="add(${p.id}, event)">Adicionar</button>
+                    <!-- 🔥 IMPORTANTE: stopPropagation -->
+                    <button onclick="add(${p.id}, event); event.stopPropagation();">
+                        Adicionar
+                    </button>
                 </div>
             `;
         });
@@ -563,28 +567,157 @@ header {
     // =====================
     // CARRINHO
     // =====================
-    function add(id, event) {
 
-        if(!isLogado()){
+    // ➕ ADICIONAR
+    async function add(id, event) {
+
+        if (!isLogado()) {
             alert("Faça login para adicionar ao carrinho!");
             window.location.href = "/login.html";
             return;
         }
 
-        const produto = produtosGlobais.find(p => p.id === id);
-        const existente = carrinho.find(p => p.id === id);
-
-        if (existente) {
-            existente.qtd++;
-        } else {
-            carrinho.push({ ...produto, qtd: 1 });
-        }
+        await fetch(API + "/carrinho/adicionar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + getToken()
+            },
+            body: JSON.stringify({
+                produtoId: id,
+                quantidade: 1
+            })
+        });
 
         animarProduto(event);
-        atualizarCarrinho();
+        await carregarCarrinho();
     }
 
+ async function carregarCarrinho() {
+    if (!isLogado()) return;
+
+    try {
+        const res = await fetch(API + "/carrinho", {
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            }
+        });
+
+        if (!res.ok) return;
+
+        const carrinho = await res.json(); // 🔥 PROBLEMA AQUI
+
+        atualizarCarrinhoUI(carrinho);
+
+    } catch (e) {
+        console.error("Erro carrinho:", e);
+    }
+}
+
+    // =====================
+    // UI CARRINHO
+    // =====================
+    function atualizarCarrinhoUI(carrinho) {
+
+        const itens = document.getElementById("itens");
+        const totalEl = document.getElementById("total");
+        const qtd = document.getElementById("qtd");
+
+        itens.innerHTML = "";
+
+        let total = 0;
+        let totalQtd = 0;
+
+        const listaItens = carrinho?.itens ?? [];
+
+        if (listaItens.length === 0) {
+            itens.innerHTML = "<p>Carrinho vazio</p>";
+            totalEl.innerText = "0.00";
+            qtd.innerText = "0";
+            return;
+        }
+
+        listaItens.forEach((item) => {
+
+            const p = item.produto;
+
+            itens.innerHTML += `
+                <div class="item" style="display:flex; gap:10px; align-items:center;">
+                    <img src="${API}/uploads/${p.imagem}"
+                         style="width:50px; height:50px; object-fit:cover; border-radius:5px">
+
+                    <div style="flex:1;">
+                        <div><strong>${p.produto}</strong></div>
+                        <div>R$ ${p.valor}</div>
+
+                        <div>
+                            <button onclick="diminuir(${p.id})">-</button>
+                            ${item.quantidade}
+                            <button onclick="aumentar(${p.id})">+</button>
+                        </div>
+                    </div>
+
+                    <button onclick="remover(${p.id})"
+                        style="background:red;color:white;border:none;padding:5px;">
+                        X
+                    </button>
+                </div>
+            `;
+
+            total += p.valor * item.quantidade;
+            totalQtd += item.quantidade;
+        });
+
+        totalEl.innerText = total.toFixed(2);
+        qtd.innerText = totalQtd;
+    }
+
+    // =====================
+    // ALTERAÇÕES
+    // =====================
+    async function aumentar(produtoId) {
+        await fetch(API + "/carrinho/adicionar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + getToken()
+            },
+            body: JSON.stringify({
+                produtoId,
+                quantidade: 1
+            })
+        });
+
+        await carregarCarrinho();
+    }
+
+    async function diminuir(produtoId) {
+        await fetch(API + `/carrinho/remover/${produtoId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            }
+        });
+
+        await carregarCarrinho();
+    }
+
+    async function remover(produtoId) {
+        await fetch(API + `/carrinho/remover/${produtoId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            }
+        });
+
+        await carregarCarrinho();
+    }
+
+    // =====================
+    // ANIMAÇÃO
+    // =====================
     function animarProduto(event) {
+
         const botao = event.target;
         const card = botao.closest(".card");
         const img = card.querySelector("img");
@@ -617,54 +750,10 @@ header {
         setTimeout(() => clone.remove(), 800);
     }
 
-    function atualizarCarrinho() {
-        const itens = document.getElementById("itens");
-        const totalEl = document.getElementById("total");
-        const qtd = document.getElementById("qtd");
-
-        itens.innerHTML = "";
-        let total = 0;
-
-        carrinho.forEach((p, index) => {
-            itens.innerHTML += `
-                <div class="item" style="display:flex; gap:10px; align-items:center;">
-                    <img src="${API}/uploads/${p.imagem}"
-                         style="width:50px; height:50px; object-fit:cover; border-radius:5px">
-
-                    <div style="flex:1;">
-                        <div><strong>${p.produto}</strong></div>
-                        <div>R$ ${p.valor}</div>
-
-                        <div>
-                            <button onclick="diminuir(${index})">-</button>
-                            ${p.qtd}
-                            <button onclick="aumentar(${index})">+</button>
-                        </div>
-                    </div>
-
-                    <button onclick="remover(${index})"
-                        style="background:red;color:white;border:none;padding:5px;">
-                        X
-                    </button>
-                </div>
-            `;
-
-            total += p.valor * p.qtd;
-        });
-
-        totalEl.innerText = total.toFixed(2);
-        qtd.innerText = carrinho.reduce((s, p) => s + p.qtd, 0);
-    }
-
-    function aumentar(i){ carrinho[i].qtd++; atualizarCarrinho(); }
-    function diminuir(i){
-        carrinho[i].qtd--;
-        if(carrinho[i].qtd <= 0) carrinho.splice(i,1);
-        atualizarCarrinho();
-    }
-    function remover(i){ carrinho.splice(i,1); atualizarCarrinho(); }
-
-    function toggleCarrinho(){
+    // =====================
+    // CARRINHO UI TOGGLE
+    // =====================
+    function toggleCarrinho() {
         document.getElementById("carrinho").classList.toggle("ativo");
     }
 
@@ -679,14 +768,26 @@ header {
             return;
         }
 
-        if (carrinho.length === 0) {
+        const res = await fetch(API + "/carrinho", {
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            }
+        });
+
+        const carrinho = await res.json();
+
+        const itens = carrinho?.itens ?? [];
+
+        if (itens.length === 0) {
             alert("Carrinho vazio!");
             return;
         }
 
-        let total = carrinho.reduce((s, p) => s + p.valor * p.qtd, 0);
+        let total = itens.reduce((s, item) => {
+            return s + item.produto.valor * item.quantidade;
+        }, 0);
 
-        const res = await fetch(API + "/pagamentos", {
+        const pagamento = await fetch(API + "/pagamentos", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -695,9 +796,10 @@ header {
             body: JSON.stringify({ valor: total })
         });
 
-        const link = await res.text();
+        const link = await pagamento.text();
         window.location.href = link;
     }
+
 </script>
 
 </body>

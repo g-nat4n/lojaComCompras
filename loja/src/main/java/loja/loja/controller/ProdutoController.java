@@ -83,4 +83,10 @@ public class ProdutoController {
 
         carrinhoRepository.save(carrinho);
     }
+
+    @GetMapping("/{id}")
+    public Produto buscarPorId(@PathVariable Long id) {
+        return produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+    }
 }

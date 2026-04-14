@@ -1,10 +1,8 @@
 package loja.loja.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
 @Entity
 public class ItemCarrinho {
@@ -18,6 +16,8 @@ public class ItemCarrinho {
     private Produto produto;
 
     @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "carrinho_id")
     private Carrinho carrinho;
 
 

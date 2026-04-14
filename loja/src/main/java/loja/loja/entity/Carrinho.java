@@ -1,6 +1,7 @@
 package loja.loja.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -17,7 +18,13 @@ public class Carrinho {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "carrinho", cascade = CascadeType.ALL)
+
+    @OneToMany(
+            mappedBy = "carrinho",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
     private List<ItemCarrinho> itens = new ArrayList<>();
 
 
