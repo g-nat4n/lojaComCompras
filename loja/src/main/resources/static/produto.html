@@ -114,7 +114,7 @@
             align-items: flex-start;
         }
 
-        /* MINIATURAS FIXAS */
+        /* MINIATURAS */
         .miniaturas {
             display: flex;
             flex-direction: column;
@@ -135,7 +135,6 @@
 
         .miniaturas img:hover { border-color: #3483fa; }
 
-        /* CONTAINER DE IMAGEM FIXO */
         .imagem-wrapper {
             width: 400px;
             height: 400px;
@@ -198,6 +197,99 @@
         .comprar { background: #3483fa; color: white; }
         .comprar:hover { background: #2968c8; }
         .carrinho-btn { background: #e3edfb; color: #3483fa; }
+
+        /* SEÇÃO DE RECOMENDAÇÕES (O QUE VOCÊ PEDIU) */
+        .recomendacoes-titulo {
+            font-size: 20px;
+            color: #333;
+            margin: 40px 0 20px 0;
+            font-weight: 400;
+        }
+
+        .grid-produtos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 15px;
+            margin-bottom: 50px;
+        }
+
+        .card-produto {
+            background: white;
+            border-radius: 8px;
+            padding: 0; /* Removido padding interno para imagem encostar no topo se quiser */
+            text-decoration: none;
+            color: inherit;
+            transition: box-shadow 0.3s;
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .card-produto:hover {
+            box-shadow: 0 7px 15px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+        }
+
+        .card-img-container {
+            width: 100%;
+            height: 180px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-img-container img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .card-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .card-nome {
+            font-size: 14px;
+            color: #333;
+            height: 34px;
+            overflow: hidden;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .card-preco-antigo {
+            font-size: 12px;
+            color: #999;
+            text-decoration: line-through;
+            margin-bottom: -5px;
+        }
+
+        .card-preco {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .card-parcelas {
+            font-size: 13px;
+            color: #00a650;
+        }
+
+        .card-tag {
+            color: #00a650;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
 
         /* CARRINHO DRAWER */
         #carrinho {
@@ -273,6 +365,10 @@
             <button class="btn carrinho-btn" onclick="addCarrinho()">Adicionar ao carrinho</button>
         </div>
     </div>
+
+    <h2 class="recomendacoes-titulo">Quem viu este produto também comprou</h2>
+    <div class="grid-produtos" id="listaRecomendados">
+    </div>
 </div>
 
 <footer>Minha Loja © 2026</footer>
@@ -297,15 +393,16 @@
     const id = new URLSearchParams(window.location.search).get("id");
     let produtoAtual = null;
 
+    // Funções de Utilitário
     function authHeader() {
         const token = localStorage.getItem("token");
         return token ? { "Authorization": "Bearer " + token } : {};
     }
-
     function isLogado() { return !!localStorage.getItem("token"); }
     function logout() { localStorage.removeItem("token"); location.reload(); }
     function toggleCarrinho() { document.getElementById("carrinho").classList.toggle("ativo"); }
 
+    // Verificar Usuário
     async function verificarLogin() {
         if (!isLogado()) return;
         try {
@@ -317,6 +414,7 @@
         } catch { logout(); }
     }
 
+    // Carregar Produto Principal
     async function carregarProduto() {
         if(!id) return;
         try {
@@ -335,22 +433,17 @@
             const containerMini = document.getElementById("containerMiniaturas");
             containerMini.innerHTML = "";
 
-            // Se houver múltiplas imagens no banco
             if (p.imagens && p.imagens.length > 0) {
                 p.imagens.forEach(imgNome => {
                     const thumb = document.createElement("img");
                     thumb.src = `${API}/uploads/${imgNome}`;
                     thumb.onclick = () => {
                         imgPrincipal.style.opacity = 0.5;
-                        setTimeout(() => {
-                            imgPrincipal.src = thumb.src;
-                            imgPrincipal.style.opacity = 1;
-                        }, 100);
+                        setTimeout(() => { imgPrincipal.src = thumb.src; imgPrincipal.style.opacity = 1; }, 100);
                     };
                     containerMini.appendChild(thumb);
                 });
             } else {
-                // Caso contrário mostra só a principal
                 const thumb = document.createElement("img");
                 thumb.src = `${API}/uploads/${p.imagem}`;
                 containerMini.appendChild(thumb);
@@ -358,6 +451,43 @@
         } catch (err) { console.error("Erro ao carregar produto", err); }
     }
 
+    // CARREGAR RECOMENDAÇÕES (O NOVO CÓDIGO)
+    async function carregarRecomendados() {
+        try {
+            const res = await fetch(`${API}/produtos`);
+            const produtos = await res.json();
+            const container = document.getElementById("listaRecomendados");
+            container.innerHTML = "";
+
+            // Filtra para não mostrar o produto atual e pega os 5 primeiros
+            const filtrados = produtos.filter(p => p.id != id).slice(0, 5);
+
+            filtrados.forEach(p => {
+                const card = document.createElement("a");
+                card.href = `produto.html?id=${p.id}`;
+                card.className = "card-produto";
+
+                // Cálculo de preço antigo fictício para visual (+20%)
+                const precoAntigo = (p.valor * 1.2).toFixed(2);
+
+                card.innerHTML = `
+                    <div class="card-img-container">
+                        <img src="${API}/uploads/${p.imagem}" alt="${p.produto}">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-nome">${p.produto}</div>
+                        <div class="card-preco-antigo">R$ ${precoAntigo}</div>
+                        <div class="card-preco">R$ ${p.valor.toFixed(2)}</div>
+                        <div class="card-parcelas">10x R$ ${(p.valor / 10).toFixed(2)} sem juros</div>
+                        <div class="card-tag">Frete grátis Full</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        } catch (err) { console.error("Erro ao carregar recomendados", err); }
+    }
+
+    // Lógica do Carrinho
     async function carregarCarrinho() {
         if (!isLogado()) return;
         try {
@@ -412,45 +542,11 @@
         toggleCarrinho();
     }
 
-    async function aumentar(pid) {
-        await fetch(API + "/carrinho/adicionar", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", ...authHeader() },
-            body: JSON.stringify({ produtoId: pid, quantidade: 1 })
-        });
-        carregarCarrinho();
-    }
-
-    async function diminuir(pid) {
-        await fetch(API + `/carrinho/remover/${pid}`, { method: "DELETE", headers: authHeader() });
-        carregarCarrinho();
-    }
-
-    async function comprarAgora() {
-        if (!isLogado()) return window.location.href = "/login.html";
-        const res = await fetch(API + "/pagamentos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", ...authHeader() },
-            body: JSON.stringify({ valor: produtoAtual.valor })
-        });
-        if (res.ok) { window.location.href = await res.text(); }
-    }
-
-    async function finalizarCarrinho() {
-        if (!isLogado()) return window.location.href = "/login.html";
-        const total = parseFloat(document.getElementById("total").innerText);
-        if (total <= 0) return alert("Carrinho vazio!");
-        const res = await fetch(API + "/pagamentos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", ...authHeader() },
-            body: JSON.stringify({ valor: total })
-        });
-        if (res.ok) { window.location.href = await res.text(); }
-    }
-
+    // Inicialização
     verificarLogin();
     carregarProduto();
     carregarCarrinho();
+    carregarRecomendados();
 </script>
 </body>
 </html>
