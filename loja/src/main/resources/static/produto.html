@@ -1,14 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Produto</title>
+    <title>Produto | Minha Loja</title>
 
     <style>
         body {
             margin: 0;
-            font-family: 'Segoe UI', Arial;
+            font-family: 'Segoe UI', Arial, sans-serif;
             background: #f5f5f5;
             display: flex;
             flex-direction: column;
@@ -99,11 +98,13 @@
         }
 
         .btn-logout {
+            padding: 5px 12px;
             border: 2px solid red;
             background: transparent;
             color: red;
             border-radius: 20px;
             cursor: pointer;
+            font-size: 12px;
         }
 
         /* PRODUTO */
@@ -118,9 +119,9 @@
             background: white;
             padding: 30px;
             border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        /* MINIATURAS */
         .miniaturas {
             display: flex;
             flex-direction: column;
@@ -133,47 +134,62 @@
             object-fit: cover;
             border: 1px solid #ddd;
             cursor: pointer;
+            border-radius: 4px;
         }
 
-        /* IMAGEM */
         .imagem img {
             width: 400px;
+            border-radius: 8px;
         }
 
-        /* INFO */
         .info {
             flex: 1;
         }
 
         .info h1 {
             font-size: 24px;
+            color: #333;
+            margin-top: 0;
         }
 
         .preco {
             font-size: 36px;
             font-weight: bold;
             margin: 10px 0;
+            color: #333;
         }
 
         .parcelas {
             color: #00a650;
+            font-weight: 500;
         }
 
-        /* COMPRA */
+        /* COMPRA BOX - AJUSTADO PARA SUBIR BOTÃO */
         .compra-box {
             width: 300px;
             border: 1px solid #eee;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .compra-box p {
+            margin: 0 0 5px 0;
+            font-size: 14px;
         }
 
         .btn {
             width: 100%;
             padding: 15px;
             border: none;
-            margin-top: 10px;
             cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.2s;
         }
 
         .comprar {
@@ -181,10 +197,56 @@
             color: white;
         }
 
+        .comprar:hover {
+            background: #2968c8;
+        }
+
         .carrinho-btn {
             background: #e3edfb;
             color: #3483fa;
+        }
+
+        .carrinho-btn:hover {
+            background: #d1e3fa;
+        }
+
+        /* ESTILO DOS BOTÕES DO CARRINHO (DRAWER) */
+        .qty-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+        }
+
+        .btn-qty {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid #3483fa;
+            background: white;
+            color: #3483fa;
             font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .btn-qty:hover {
+            background: #3483fa;
+            color: white;
+        }
+
+        .btn-remover {
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+            margin-top: 4px;
         }
 
         /* FOOTER */
@@ -194,6 +256,10 @@
             color: white;
             text-align: center;
             padding: 20px;
+        }
+
+        #carrinho.ativo {
+            right: 0 !important;
         }
     </style>
 </head>
@@ -211,12 +277,14 @@
             </div>
         </div>
 
-        <div style="display:flex; gap:15px;">
+        <div style="display:flex; gap:15px; align-items:center;">
             <div id="userArea">
                 <a href="/login.html" class="link-login">Login</a>
             </div>
 
-            <div>🛒 <span id="qtd">0</span></div>
+            <div id="iconeCarrinho" onclick="toggleCarrinho()" style="cursor:pointer; font-weight: bold;">
+                🛒 (<span id="qtd">0</span>)
+            </div>
         </div>
     </div>
 
@@ -240,13 +308,13 @@
         </div>
 
         <div class="info">
-            <h1 id="nome"></h1>
-            <div class="preco" id="preco"></div>
+            <h1 id="nome">Carregando...</h1>
+            <div class="preco" id="preco">R$ 0,00</div>
             <div class="parcelas" id="parcelas"></div>
         </div>
 
         <div class="compra-box">
-            <p style="color:green;">Frete grátis</p>
+            <p style="color:green; font-weight: bold;">✓ Frete grátis</p>
 
             <button class="btn comprar" onclick="comprarAgora()">
                 Comprar agora
@@ -264,150 +332,209 @@
     Minha Loja © 2026
 </footer>
 
+<div id="carrinho" style="
+    position: fixed;
+    right: -350px;
+    top: 0;
+    width: 320px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+    padding: 20px;
+    transition: right 0.3s ease;
+    z-index: 9999;
+    display:flex;
+    flex-direction:column;
+">
+    <div style="display:flex; justify-content:space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+        <h3 style="margin:0;">🛒 Meu Carrinho</h3>
+        <span onclick="toggleCarrinho()" style="cursor:pointer; font-size: 20px;">✕</span>
+    </div>
+
+    <div id="itens" style="flex:1; overflow-y:auto; padding-top: 15px;"></div>
+
+    <div style="font-weight:bold; margin-top:10px; border-top: 1px solid #eee; padding-top: 15px; font-size: 18px; display: flex; justify-content: space-between;">
+        <span>Total:</span>
+        <span>R$ <span id="total">0.00</span></span>
+    </div>
+
+    <div style="margin-top:20px;">
+        <button onclick="finalizarCarrinho()" style="
+            width:100%;
+            padding:16px;
+            background:#00a650;
+            color:white;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:bold;
+            font-size:16px;
+        "> Finalizar Compra </button>
+    </div>
+</div>
+
 <script>
     const API = "http://localhost:8080";
     const id = new URLSearchParams(window.location.search).get("id");
-
     let produtoAtual = null;
 
-    // =====================
-    // AUTH PADRÃO (🔥 NOVO)
-    // =====================
     function authHeader() {
         const token = localStorage.getItem("token");
         return token ? { "Authorization": "Bearer " + token } : {};
     }
 
-    function isLogado() {
-        return !!localStorage.getItem("token");
-    }
+    function isLogado() { return !!localStorage.getItem("token"); }
+    function logout() { localStorage.removeItem("token"); location.reload(); }
+    function toggleCarrinho() { document.getElementById("carrinho").classList.toggle("ativo"); }
 
-    function logout() {
-        localStorage.removeItem("token");
-        location.reload();
-    }
-
-    // =====================
-    // LOGIN HEADER
-    // =====================
     async function verificarLogin() {
         if (!isLogado()) return;
-
         try {
-            const res = await fetch(API + "/auth/me", {
-                headers: authHeader()
-            });
-
+            const res = await fetch(API + "/auth/me", { headers: authHeader() });
             if (!res.ok) throw new Error();
-
             const email = await res.text();
-
             document.getElementById("userArea").innerHTML = `
                 <div class="user-info">
                     👤 <span>${email}</span>
                     <button class="btn-logout" onclick="logout()">Sair</button>
                 </div>
             `;
-
-        } catch (e) {
-            logout();
-        }
+        } catch { logout(); }
     }
 
-    // =====================
-    // PRODUTO
-    // =====================
-    fetch(`${API}/produtos/${id}`)
-    .then(res => res.json())
-    .then(p => {
-        produtoAtual = p;
+    // Carrega dados do produto principal
+    function carregarProduto() {
+        if(!id) return;
+        fetch(`${API}/produtos/${id}`)
+        .then(res => res.json())
+        .then(p => {
+            produtoAtual = p;
+            document.getElementById("nome").innerText = p.produto;
+            document.getElementById("preco").innerText = "R$ " + p.valor;
+            let parcela = (p.valor / 12).toFixed(2);
+            document.getElementById("parcelas").innerText = `12x de R$ ${parcela}`;
+            let img = `${API}/uploads/${p.imagem}`;
+            document.getElementById("imagem").src = img;
+            document.getElementById("thumb1").src = img;
+            document.getElementById("thumb2").src = img;
+            document.getElementById("thumb3").src = img;
+        });
+    }
 
-        document.getElementById("nome").innerText = p.produto;
-        document.getElementById("preco").innerText = "R$ " + p.valor;
-
-        let parcela = (p.valor / 12).toFixed(2);
-        document.getElementById("parcelas").innerText =
-            `12x de R$ ${parcela}`;
-
-        let img = `${API}/uploads/${p.imagem}`;
-
-        document.getElementById("imagem").src = img;
-        document.getElementById("thumb1").src = img;
-        document.getElementById("thumb2").src = img;
-        document.getElementById("thumb3").src = img;
-    });
-
-    // =====================
-    // CARRINHO
-    // =====================
     async function carregarCarrinho() {
         if (!isLogado()) return;
+        try {
+            const res = await fetch(API + "/carrinho", { headers: authHeader() });
+            if (!res.ok) return;
+            const carrinho = await res.json();
 
-        const res = await fetch(API + "/carrinho", {
-            headers: authHeader()
-        });
+            // Atualiza a bolinha de quantidade no ícone
+            const qtdTotal = carrinho?.itens?.reduce((a, b) => a + b.quantidade, 0) || 0;
+            document.getElementById("qtd").innerText = qtdTotal;
 
-        if (!res.ok) return;
-
-        const carrinho = await res.json();
-
-        let totalQtd = 0;
-
-        carrinho?.itens?.forEach(i => {
-            totalQtd += i.quantidade;
-        });
-
-        document.getElementById("qtd").innerText = totalQtd;
+            renderCarrinho(carrinho);
+        } catch (err) {
+            console.error("Erro ao carregar carrinho:", err);
+        }
     }
 
-    // =====================
-    // AÇÕES
-    // =====================
-    async function addCarrinho() {
-        if (!isLogado()) {
-            window.location.href = "/login.html";
+    function renderCarrinho(carrinho) {
+        const itensContainer = document.getElementById("itens");
+        const totalEl = document.getElementById("total");
+        itensContainer.innerHTML = "";
+        let total = 0;
+
+        if (!carrinho.itens || carrinho.itens.length === 0) {
+            itensContainer.innerHTML = "<p style='text-align:center; color:#999;'>Carrinho vazio</p>";
+            totalEl.innerText = "0.00";
             return;
         }
 
+        carrinho.itens.forEach(i => {
+            // IMPORTANTE: Verifique se no seu Java o nome é i.produtoId ou i.id
+            const pId = i.produtoId || i.id;
+
+            itensContainer.innerHTML += `
+                <div style="display:flex; gap:12px; margin-bottom:20px; align-items: center;">
+                    <img src="${API}/uploads/${i.imagem}" style="width:60px;height:60px;object-fit:cover; border-radius: 6px;">
+                    <div style="flex:1">
+                        <div style="font-weight:bold; font-size:14px; color:#333;">${i.nome}</div>
+                        <div style="color:#666; font-size:13px;">R$ ${i.valor}</div>
+                        <div class="qty-wrapper">
+                            <button class="btn-qty" onclick="diminuir(${pId})">-</button>
+                            <span style="font-size:14px; font-weight:bold;">${i.quantidade}</span>
+                            <button class="btn-qty" onclick="aumentar(${pId})">+</button>
+                        </div>
+                        <button class="btn-remover" onclick="remover(${pId})">Remover</button>
+                    </div>
+                </div>
+            `;
+            total += i.valor * i.quantidade;
+        });
+        totalEl.innerText = total.toFixed(2);
+    }
+
+    async function addCarrinho() {
+        if (!isLogado()) return window.location.href = "/login.html";
         await fetch(API + "/carrinho/adicionar", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...authHeader()
-            },
-            body: JSON.stringify({
-                produtoId: produtoAtual.id,
-                quantidade: 1
-            })
+            headers: { "Content-Type": "application/json", ...authHeader() },
+            body: JSON.stringify({ produtoId: produtoAtual.id, quantidade: 1 })
         });
-
-        await carregarCarrinho(); // 🔥 ATUALIZA
-        alert("Adicionado ao carrinho!");
+        await carregarCarrinho();
+        toggleCarrinho();
     }
 
-    async function comprarAgora() {
-        if (!isLogado()) {
-            window.location.href = "/login.html";
-            return;
-        }
-
-        const pagamento = await fetch(API + "/pagamentos", {
+    async function aumentar(pid) {
+        await fetch(API + "/carrinho/adicionar", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...authHeader()
-            },
-            body: JSON.stringify({ valor: produtoAtual.valor })
+            headers: { "Content-Type": "application/json", ...authHeader() },
+            body: JSON.stringify({ produtoId: pid, quantidade: 1 })
         });
-
-        const link = await pagamento.text();
-        window.location.href = link;
+        carregarCarrinho();
     }
 
-    // INIT
-    verificarLogin();
-    carregarCarrinho();
-</script>
+    async function diminuir(pid) {
+        // No seu backend, verifique se o DELETE espera o ID do produto na URL
+        await fetch(API + `/carrinho/remover/${pid}`, { method: "DELETE", headers: authHeader() });
+        carregarCarrinho();
+    }
 
+    async function remover(pid) {
+        await fetch(API + `/carrinho/remover/${pid}`, { method: "DELETE", headers: authHeader() });
+        carregarCarrinho();
+    }
+
+    // PAGAMENTOS
+    async function comprarAgora() {
+        if (!isLogado()) return window.location.href = "/login.html";
+        const valorLimpo = parseFloat(produtoAtual.valor);
+        const res = await fetch(API + "/pagamentos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...authHeader() },
+            body: JSON.stringify({ valor: valorLimpo })
+        });
+        if (res.ok) { window.location.href = await res.text(); }
+        else { alert("Erro ao gerar pagamento."); }
+    }
+
+    async function finalizarCarrinho() {
+        if (!isLogado()) return window.location.href = "/login.html";
+        const totalFloat = parseFloat(document.getElementById("total").innerText);
+        if (totalFloat <= 0) return alert("Seu carrinho está vazio!");
+        const res = await fetch(API + "/pagamentos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...authHeader() },
+            body: JSON.stringify({ valor: totalFloat })
+        });
+        if (res.ok) { window.location.href = await res.text(); }
+        else { alert("Erro ao finalizar carrinho."); }
+    }
+
+    // === EXECUÇÃO INICIAL ===
+    verificarLogin();
+    carregarProduto();
+    carregarCarrinho(); // Esta chamada é essencial para os itens aparecerem ao abrir a página
+</script>
 </body>
 </html>
