@@ -371,6 +371,42 @@ header {
 .btn-logout:active {
     transform: scale(0.95);
 }
+
+        .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.qty-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.qty-btn:hover {
+    background: #ddd;
+}
+
+.remove-btn {
+    border: none;
+    background: transparent;
+    color: #ff4d4d;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
     </style>
 </head>
 
@@ -639,74 +675,77 @@ header {
       await carregarCarrinho();
   }
 
-  async function carregarCarrinho() {
-      if (!isLogado()) return;
+ async function carregarCarrinho() {
+    if (!isLogado()) return;
 
-      try {
-          const res = await fetch(API + "/carrinho", {
-              headers: {
-                  "Authorization": "Bearer " + getToken()
-              }
-          });
+    try {
+        const res = await fetch(API + "/carrinho", {
+            headers: {
+                "Authorization": "Bearer " + getToken()
+            }
+        });
 
-          const carrinho = await res.json();
-          atualizarCarrinhoUI(carrinho);
+        const carrinho = await res.json();
 
-      } catch (e) {
-          console.error(e);
-      }
-  }
+        atualizarCarrinhoUI(carrinho);
 
-  function atualizarCarrinhoUI(carrinho) {
+    } catch (err) {
+        console.error("Erro carrinho:", err);
+    }
+}
 
-      const itens = document.getElementById("itens");
-      const totalEl = document.getElementById("total");
-      const qtd = document.getElementById("qtd");
+function atualizarCarrinhoUI(carrinho) {
 
-      itens.innerHTML = "";
+    const itens = document.getElementById("itens");
+    const totalEl = document.getElementById("total");
+    const qtd = document.getElementById("qtd");
 
-      let total = 0;
-      let totalQtd = 0;
+    itens.innerHTML = "";
 
-      const listaItens = carrinho?.itens ?? [];
+    const lista = carrinho.itens || [];
 
-      if (listaItens.length === 0) {
-          itens.innerHTML = "<p>Carrinho vazio</p>";
-          totalEl.innerText = "0.00";
-          qtd.innerText = "0";
-          return;
-      }
+    if (lista.length === 0) {
+        itens.innerHTML = "<p>Carrinho vazio</p>";
+        totalEl.innerText = "0.00";
+        qtd.innerText = "0";
+        return;
+    }
 
-      listaItens.forEach(item => {
+    let total = 0;
+    let totalQtd = 0;
 
-          const p = item.produto;
+    lista.forEach(item => {
 
-          itens.innerHTML += `
-              <div class="item">
-                  <img src="${API}/uploads/${p.imagem}">
+        itens.innerHTML += `
+            <div class="item">
+                <img src="${API}/uploads/${item.imagem}" style="width:50px;height:50px;object-fit:cover;">
 
-                  <div style="flex:1;">
-                      <div><strong>${p.produto}</strong></div>
-                      <div>R$ ${p.valor}</div>
+                <div style="flex:1; padding-left:10px;">
+                    <strong>${item.nome}</strong>
+                    <div>R$ ${item.valor}</div>
 
-                      <div>
-                          <button onclick="diminuir(${p.id})">-</button>
-                          ${item.quantidade}
-                          <button onclick="aumentar(${p.id})">+</button>
-                      </div>
-                  </div>
+                   <div class="qty-controls">
+    <button class="qty-btn" onclick="diminuir(${item.produtoId})">-</button>
 
-                  <button onclick="remover(${p.id})">X</button>
-              </div>
-          `;
+    <span>${item.quantidade}</span>
 
-          total += p.valor * item.quantidade;
-          totalQtd += item.quantidade;
-      });
+    <button class="qty-btn" onclick="aumentar(${item.produtoId})">+</button>
+</div>
 
-      totalEl.innerText = total.toFixed(2);
-      qtd.innerText = totalQtd;
-  }
+<button class="remove-btn" onclick="remover(${item.produtoId})">🗑</button>
+                </div>
+
+                <button onclick="remover(${item.produtoId})">X</button>
+            </div>
+        `;
+
+        total += item.valor * item.quantidade;
+        totalQtd += item.quantidade;
+    });
+
+    totalEl.innerText = total.toFixed(2);
+    qtd.innerText = totalQtd;
+}
 
   // =====================
   // ALTERAÇÕES
@@ -798,42 +837,48 @@ header {
   // =====================
   async function comprar() {
 
-      if (!isLogado()) {
-          alert("Faça login!");
-          window.location.href = "/login.html";
-          return;
-      }
+    if (!isLogado()) {
+        alert("Faça login!");
+        window.location.href = "/login.html";
+        return;
+    }
 
-      const res = await fetch(API + "/carrinho", {
-          headers: {
-              "Authorization": "Bearer " + getToken()
-          }
-      });
+    const res = await fetch(API + "/carrinho", {
+        headers: {
+            "Authorization": "Bearer " + getToken()
+        }
+    });
 
-      const carrinho = await res.json();
-      const itens = carrinho?.itens ?? [];
+    const carrinho = await res.json();
+    const itens = carrinho?.itens ?? [];
 
-      if (itens.length === 0) {
-          alert("Carrinho vazio!");
-          return;
-      }
+    if (itens.length === 0) {
+        alert("Carrinho vazio!");
+        return;
+    }
 
-      let total = itens.reduce((s, item) => {
-          return s + item.produto.valor * item.quantidade;
-      }, 0);
+    let total = itens.reduce((s, item) => {
+        return s + (item.valor * item.quantidade);
+    }, 0);
 
-      const pagamento = await fetch(API + "/pagamentos", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + getToken()
-          },
-          body: JSON.stringify({ valor: total })
-      });
+    const pagamento = await fetch(API + "/pagamentos", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + getToken()
+        },
+        body: JSON.stringify({ valor: total })
+    });
 
-      const link = await pagamento.text();
-      window.location.href = link;
-  }
+    const link = await pagamento.text();
+
+    if (!link || !link.startsWith("http")) {
+        alert("Erro ao gerar pagamento");
+        return;
+    }
+
+    window.location.href = link;
+}
 </script>
 
 </body>
