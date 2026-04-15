@@ -2,100 +2,35 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Cadastro</title>
+    <title>Admin - Cadastro Completo</title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial;
-        }
+        /* ... Seus estilos anteriores ... */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial; }
+        body { background: linear-gradient(135deg, #1e1e2f, #2c2c54); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 15px; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        h2 { text-align: center; margin-bottom: 20px; color: #333; }
+        .input-group { margin-bottom: 15px; }
+        label { font-size: 14px; color: #555; display: block; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; transition: 0.2s; }
+        textarea { height: 80px; resize: none; }
 
-        body {
-            background: linear-gradient(135deg, #1e1e2f, #2c2c54);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            width: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {opacity: 0; transform: translateY(20px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            font-size: 14px;
-            color: #555;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            transition: 0.2s;
-        }
-
-        input:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 5px rgba(0,123,255,0.3);
-        }
-
-        input[type="file"] {
-            border: none;
-        }
-
-        .preview {
+        /* Estilo para múltiplas fotos */
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
             margin-top: 10px;
-            text-align: center;
         }
-
-        .preview img {
-            max-width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 8px;
-            display: none;
-        }
-
-        button {
+        .preview-container img {
             width: 100%;
-            padding: 12px;
-            background: #007bff;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #eee;
         }
-
-        button:hover {
-            background: #0056b3;
-        }
+        button { width: 100%; padding: 12px; background: #007bff; border: none; border-radius: 8px; color: white; font-size: 16px; cursor: pointer; }
+        button:hover { background: #0056b3; }
     </style>
 </head>
 
@@ -105,52 +40,80 @@
     <h2>📦 Novo Produto</h2>
 
     <div class="input-group">
-        <label>Nome</label>
+        <label>Nome do Produto</label>
         <input type="text" id="nome">
     </div>
 
     <div class="input-group">
         <label>Preço</label>
-        <input type="number" id="preco">
+        <input type="number" step="0.01" id="preco">
     </div>
 
     <div class="input-group">
-        <label>Imagem</label>
-        <input type="file" id="imagem" onchange="previewImagem()">
+        <label>Descrição Detalhada</label>
+        <textarea id="descricao" placeholder="Conte mais sobre o produto..."></textarea>
     </div>
 
-    <div class="preview">
-        <img id="imgPreview">
+    <div class="input-group">
+        <label>Fotos (Selecione uma ou mais)</label>
+        <input type="file" id="fotos" multiple onchange="previewImagens()">
     </div>
 
-    <button onclick="cadastrar()">Cadastrar</button>
+    <div id="containerPreviews" class="preview-container">
+    </div>
+
+    <button onclick="cadastrar()" style="margin-top: 20px;">Cadastrar Produto</button>
 </div>
 
 <script>
-    function previewImagem() {
-        const file = document.getElementById("imagem").files[0];
-        const preview = document.getElementById("imgPreview");
+    function previewImagens() {
+        const files = document.getElementById("fotos").files;
+        const container = document.getElementById("containerPreviews");
+        container.innerHTML = ""; // Limpa os previews anteriores
 
-        if (file) {
-            preview.src = URL.createObjectURL(file);
-            preview.style.display = "block";
-        }
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                container.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     async function cadastrar() {
-
         const formData = new FormData();
+        const nome = document.getElementById("nome").value;
+        const preco = document.getElementById("preco").value;
+        const descricao = document.getElementById("descricao").value;
+        const inputFotos = document.getElementById("fotos");
 
-        formData.append("nome", document.getElementById("nome").value);
-        formData.append("preco", document.getElementById("preco").value);
-        formData.append("imagem", document.getElementById("imagem").files[0]);
+        formData.append("nome", nome);
+        formData.append("preco", preco);
+        formData.append("descricao", descricao);
 
-        await fetch("http://localhost:8080/produtos/upload", {
-            method: "POST",
-            body: formData
-        });
+        // Adiciona cada foto ao FormData
+        for (let i = 0; i < inputFotos.files.length; i++) {
+            formData.append("imagens", inputFotos.files[i]);
+        }
 
-        alert("Produto cadastrado!");
+        try {
+            const res = await fetch("http://localhost:8080/produtos/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            if(res.ok) {
+                alert("Produto com descrição e fotos cadastrado com sucesso!");
+                location.reload();
+            } else {
+                alert("Erro ao cadastrar.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Erro de conexão.");
+        }
     }
 </script>
 

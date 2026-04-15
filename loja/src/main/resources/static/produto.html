@@ -68,16 +68,10 @@
             padding-top: 10px;
         }
 
-        .menu a {
-            color: white;
-            text-decoration: none;
-        }
+        .menu a { color: white; text-decoration: none; }
+        .menu a:hover { color: #00c3ff; }
 
-        .menu a:hover {
-            color: #00c3ff;
-        }
-
-        /* LOGIN */
+        /* LOGIN / USER INFO */
         .link-login {
             text-decoration: none;
             padding: 8px 16px;
@@ -91,11 +85,7 @@
             color: white;
         }
 
-        .user-info {
-            display: flex;
-            gap: 10px;
-            color: #6c63ff;
-        }
+        .user-info { display: flex; gap: 10px; color: #6c63ff; align-items: center; }
 
         .btn-logout {
             padding: 5px 12px;
@@ -107,9 +97,10 @@
             font-size: 12px;
         }
 
-        /* PRODUTO */
+        /* CONTAINER PRINCIPAL */
         .container {
             width: 90%;
+            max-width: 1200px;
             margin: 30px auto;
         }
 
@@ -120,65 +111,77 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            align-items: flex-start;
         }
 
+        /* MINIATURAS FIXAS */
         .miniaturas {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            width: 60px;
+            flex-shrink: 0;
         }
 
         .miniaturas img {
             width: 60px;
             height: 60px;
             object-fit: cover;
-            border: 1px solid #ddd;
+            border: 2px solid #eee;
             cursor: pointer;
             border-radius: 4px;
+            transition: 0.2s;
         }
 
-        .imagem img {
+        .miniaturas img:hover { border-color: #3483fa; }
+
+        /* CONTAINER DE IMAGEM FIXO */
+        .imagem-wrapper {
             width: 400px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
             border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid #f0f0f0;
         }
 
-        .info {
-            flex: 1;
+        .imagem-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: opacity 0.3s;
         }
 
-        .info h1 {
-            font-size: 24px;
-            color: #333;
-            margin-top: 0;
+        /* INFO PRODUTO */
+        .info { flex: 1; min-width: 0; }
+        .info h1 { font-size: 24px; color: #333; margin-top: 0; }
+
+        .descricao-texto {
+            margin-top: 20px;
+            color: #666;
+            line-height: 1.6;
+            font-size: 15px;
+            white-space: pre-line;
         }
 
-        .preco {
-            font-size: 36px;
-            font-weight: bold;
-            margin: 10px 0;
-            color: #333;
-        }
+        .preco { font-size: 36px; font-weight: bold; margin: 10px 0; color: #333; }
+        .parcelas { color: #00a650; font-weight: 500; }
 
-        .parcelas {
-            color: #00a650;
-            font-weight: 500;
-        }
-
-        /* COMPRA BOX - AJUSTADO PARA SUBIR BOTÃO */
+        /* BOX DE COMPRA LATERAL */
         .compra-box {
-            width: 300px;
+            width: 280px;
             border: 1px solid #eee;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
             background: #fafafa;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-        }
-
-        .compra-box p {
-            margin: 0 0 5px 0;
-            font-size: 14px;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
         .btn {
@@ -192,75 +195,35 @@
             transition: 0.2s;
         }
 
-        .comprar {
-            background: #3483fa;
-            color: white;
-        }
+        .comprar { background: #3483fa; color: white; }
+        .comprar:hover { background: #2968c8; }
+        .carrinho-btn { background: #e3edfb; color: #3483fa; }
 
-        .comprar:hover {
-            background: #2968c8;
-        }
-
-        .carrinho-btn {
-            background: #e3edfb;
-            color: #3483fa;
-        }
-
-        .carrinho-btn:hover {
-            background: #d1e3fa;
-        }
-
-        /* ESTILO DOS BOTÕES DO CARRINHO (DRAWER) */
-        .qty-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 8px 0;
-        }
-
-        .btn-qty {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            border: 1px solid #3483fa;
-            background: white;
-            color: #3483fa;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-
-        .btn-qty:hover {
-            background: #3483fa;
-            color: white;
-        }
-
-        .btn-remover {
-            background: none;
-            border: none;
-            color: #ff4d4d;
-            font-size: 12px;
-            cursor: pointer;
-            padding: 0;
-            text-decoration: underline;
-            margin-top: 4px;
-        }
-
-        /* FOOTER */
-        footer {
-            margin-top: auto;
-            background: #111;
-            color: white;
-            text-align: center;
+        /* CARRINHO DRAWER */
+        #carrinho {
+            position: fixed;
+            right: -350px;
+            top: 0;
+            width: 320px;
+            height: 100%;
+            background: #fff;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.2);
             padding: 20px;
+            transition: right 0.3s ease;
+            z-index: 9999;
+            display:flex;
+            flex-direction:column;
+        }
+        #carrinho.ativo { right: 0 !important; }
+
+        .qty-wrapper { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+        .btn-qty {
+            width: 26px; height: 26px; border-radius: 50%;
+            border: 1px solid #3483fa; background: white; color: #3483fa;
+            font-weight: bold; cursor: pointer;
         }
 
-        #carrinho.ativo {
-            right: 0 !important;
-        }
+        footer { margin-top: auto; background: #111; color: white; text-align: center; padding: 20px; }
     </style>
 </head>
 
@@ -269,25 +232,19 @@
 <header>
     <div class="topo">
         <h2>🛍️ Minha Loja</h2>
-
         <div class="busca">
             <div class="input-busca">
                 <input placeholder="Buscar produtos...">
                 <button>🔍</button>
             </div>
         </div>
-
         <div style="display:flex; gap:15px; align-items:center;">
-            <div id="userArea">
-                <a href="/login.html" class="link-login">Login</a>
-            </div>
-
+            <div id="userArea"><a href="/login.html" class="link-login">Login</a></div>
             <div id="iconeCarrinho" onclick="toggleCarrinho()" style="cursor:pointer; font-weight: bold;">
                 🛒 (<span id="qtd">0</span>)
             </div>
         </div>
     </div>
-
     <nav class="menu">
         <a href="/index.html">Início</a>
         <a href="/contato.html">Contato</a>
@@ -296,80 +253,42 @@
 
 <div class="container">
     <div class="produto-box">
+        <div class="miniaturas" id="containerMiniaturas"></div>
 
-        <div class="miniaturas">
-            <img id="thumb1">
-            <img id="thumb2">
-            <img id="thumb3">
-        </div>
-
-        <div class="imagem">
-            <img id="imagem">
+        <div class="imagem-wrapper">
+            <img id="imagemPrincipal" src="" alt="Produto">
         </div>
 
         <div class="info">
             <h1 id="nome">Carregando...</h1>
             <div class="preco" id="preco">R$ 0,00</div>
             <div class="parcelas" id="parcelas"></div>
+            <div class="descricao-texto" id="descricao"></div>
         </div>
 
         <div class="compra-box">
-            <p style="color:green; font-weight: bold;">✓ Frete grátis</p>
-
-            <button class="btn comprar" onclick="comprarAgora()">
-                Comprar agora
-            </button>
-
-            <button class="btn carrinho-btn" onclick="addCarrinho()">
-                Adicionar ao carrinho
-            </button>
+            <p style="color:green; font-weight: bold; margin:0;">✓ Frete grátis</p>
+            <p style="font-size:12px; color:#666;">Enviado por Minha Loja Full</p>
+            <button class="btn comprar" onclick="comprarAgora()">Comprar agora</button>
+            <button class="btn carrinho-btn" onclick="addCarrinho()">Adicionar ao carrinho</button>
         </div>
-
     </div>
 </div>
 
-<footer>
-    Minha Loja © 2026
-</footer>
+<footer>Minha Loja © 2026</footer>
 
-<div id="carrinho" style="
-    position: fixed;
-    right: -350px;
-    top: 0;
-    width: 320px;
-    height: 100%;
-    background: #fff;
-    box-shadow: -4px 0 15px rgba(0,0,0,0.2);
-    padding: 20px;
-    transition: right 0.3s ease;
-    z-index: 9999;
-    display:flex;
-    flex-direction:column;
-">
+<div id="carrinho">
     <div style="display:flex; justify-content:space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
         <h3 style="margin:0;">🛒 Meu Carrinho</h3>
         <span onclick="toggleCarrinho()" style="cursor:pointer; font-size: 20px;">✕</span>
     </div>
-
     <div id="itens" style="flex:1; overflow-y:auto; padding-top: 15px;"></div>
-
     <div style="font-weight:bold; margin-top:10px; border-top: 1px solid #eee; padding-top: 15px; font-size: 18px; display: flex; justify-content: space-between;">
         <span>Total:</span>
         <span>R$ <span id="total">0.00</span></span>
     </div>
-
     <div style="margin-top:20px;">
-        <button onclick="finalizarCarrinho()" style="
-            width:100%;
-            padding:16px;
-            background:#00a650;
-            color:white;
-            border:none;
-            border-radius:8px;
-            cursor:pointer;
-            font-weight:bold;
-            font-size:16px;
-        "> Finalizar Compra </button>
+        <button onclick="finalizarCarrinho()" style="width:100%; padding:16px; background:#00a650; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px;"> Finalizar Compra </button>
     </div>
 </div>
 
@@ -394,31 +313,49 @@
             if (!res.ok) throw new Error();
             const email = await res.text();
             document.getElementById("userArea").innerHTML = `
-                <div class="user-info">
-                    👤 <span>${email}</span>
-                    <button class="btn-logout" onclick="logout()">Sair</button>
-                </div>
-            `;
+                <div class="user-info">👤 <span>${email}</span><button class="btn-logout" onclick="logout()">Sair</button></div>`;
         } catch { logout(); }
     }
 
-    // Carrega dados do produto principal
-    function carregarProduto() {
+    async function carregarProduto() {
         if(!id) return;
-        fetch(`${API}/produtos/${id}`)
-        .then(res => res.json())
-        .then(p => {
+        try {
+            const res = await fetch(`${API}/produtos/${id}`);
+            const p = await res.json();
             produtoAtual = p;
+
             document.getElementById("nome").innerText = p.produto;
-            document.getElementById("preco").innerText = "R$ " + p.valor;
-            let parcela = (p.valor / 12).toFixed(2);
-            document.getElementById("parcelas").innerText = `12x de R$ ${parcela}`;
-            let img = `${API}/uploads/${p.imagem}`;
-            document.getElementById("imagem").src = img;
-            document.getElementById("thumb1").src = img;
-            document.getElementById("thumb2").src = img;
-            document.getElementById("thumb3").src = img;
-        });
+            document.getElementById("preco").innerText = "R$ " + p.valor.toFixed(2);
+            document.getElementById("parcelas").innerText = `12x de R$ ${(p.valor / 12).toFixed(2)}`;
+            document.getElementById("descricao").innerText = p.descricao || "Sem descrição disponível.";
+
+            const imgPrincipal = document.getElementById("imagemPrincipal");
+            imgPrincipal.src = `${API}/uploads/${p.imagem}`;
+
+            const containerMini = document.getElementById("containerMiniaturas");
+            containerMini.innerHTML = "";
+
+            // Se houver múltiplas imagens no banco
+            if (p.imagens && p.imagens.length > 0) {
+                p.imagens.forEach(imgNome => {
+                    const thumb = document.createElement("img");
+                    thumb.src = `${API}/uploads/${imgNome}`;
+                    thumb.onclick = () => {
+                        imgPrincipal.style.opacity = 0.5;
+                        setTimeout(() => {
+                            imgPrincipal.src = thumb.src;
+                            imgPrincipal.style.opacity = 1;
+                        }, 100);
+                    };
+                    containerMini.appendChild(thumb);
+                });
+            } else {
+                // Caso contrário mostra só a principal
+                const thumb = document.createElement("img");
+                thumb.src = `${API}/uploads/${p.imagem}`;
+                containerMini.appendChild(thumb);
+            }
+        } catch (err) { console.error("Erro ao carregar produto", err); }
     }
 
     async function carregarCarrinho() {
@@ -427,15 +364,9 @@
             const res = await fetch(API + "/carrinho", { headers: authHeader() });
             if (!res.ok) return;
             const carrinho = await res.json();
-
-            // Atualiza a bolinha de quantidade no ícone
-            const qtdTotal = carrinho?.itens?.reduce((a, b) => a + b.quantidade, 0) || 0;
-            document.getElementById("qtd").innerText = qtdTotal;
-
+            document.getElementById("qtd").innerText = carrinho?.itens?.reduce((a, b) => a + b.quantidade, 0) || 0;
             renderCarrinho(carrinho);
-        } catch (err) {
-            console.error("Erro ao carregar carrinho:", err);
-        }
+        } catch (err) { console.error(err); }
     }
 
     function renderCarrinho(carrinho) {
@@ -451,24 +382,20 @@
         }
 
         carrinho.itens.forEach(i => {
-            // IMPORTANTE: Verifique se no seu Java o nome é i.produtoId ou i.id
             const pId = i.produtoId || i.id;
-
             itensContainer.innerHTML += `
                 <div style="display:flex; gap:12px; margin-bottom:20px; align-items: center;">
-                    <img src="${API}/uploads/${i.imagem}" style="width:60px;height:60px;object-fit:cover; border-radius: 6px;">
+                    <img src="${API}/uploads/${i.imagem}" style="width:50px;height:50px;object-fit:cover; border-radius: 6px;">
                     <div style="flex:1">
-                        <div style="font-weight:bold; font-size:14px; color:#333;">${i.nome}</div>
-                        <div style="color:#666; font-size:13px;">R$ ${i.valor}</div>
+                        <div style="font-weight:bold; font-size:13px; color:#333;">${i.nome}</div>
+                        <div style="color:#666; font-size:12px;">R$ ${i.valor}</div>
                         <div class="qty-wrapper">
                             <button class="btn-qty" onclick="diminuir(${pId})">-</button>
-                            <span style="font-size:14px; font-weight:bold;">${i.quantidade}</span>
+                            <span>${i.quantidade}</span>
                             <button class="btn-qty" onclick="aumentar(${pId})">+</button>
                         </div>
-                        <button class="btn-remover" onclick="remover(${pId})">Remover</button>
                     </div>
-                </div>
-            `;
+                </div>`;
             total += i.valor * i.quantidade;
         });
         totalEl.innerText = total.toFixed(2);
@@ -495,46 +422,35 @@
     }
 
     async function diminuir(pid) {
-        // No seu backend, verifique se o DELETE espera o ID do produto na URL
         await fetch(API + `/carrinho/remover/${pid}`, { method: "DELETE", headers: authHeader() });
         carregarCarrinho();
     }
 
-    async function remover(pid) {
-        await fetch(API + `/carrinho/remover/${pid}`, { method: "DELETE", headers: authHeader() });
-        carregarCarrinho();
-    }
-
-    // PAGAMENTOS
     async function comprarAgora() {
         if (!isLogado()) return window.location.href = "/login.html";
-        const valorLimpo = parseFloat(produtoAtual.valor);
         const res = await fetch(API + "/pagamentos", {
             method: "POST",
             headers: { "Content-Type": "application/json", ...authHeader() },
-            body: JSON.stringify({ valor: valorLimpo })
+            body: JSON.stringify({ valor: produtoAtual.valor })
         });
         if (res.ok) { window.location.href = await res.text(); }
-        else { alert("Erro ao gerar pagamento."); }
     }
 
     async function finalizarCarrinho() {
         if (!isLogado()) return window.location.href = "/login.html";
-        const totalFloat = parseFloat(document.getElementById("total").innerText);
-        if (totalFloat <= 0) return alert("Seu carrinho está vazio!");
+        const total = parseFloat(document.getElementById("total").innerText);
+        if (total <= 0) return alert("Carrinho vazio!");
         const res = await fetch(API + "/pagamentos", {
             method: "POST",
             headers: { "Content-Type": "application/json", ...authHeader() },
-            body: JSON.stringify({ valor: totalFloat })
+            body: JSON.stringify({ valor: total })
         });
         if (res.ok) { window.location.href = await res.text(); }
-        else { alert("Erro ao finalizar carrinho."); }
     }
 
-    // === EXECUÇÃO INICIAL ===
     verificarLogin();
     carregarProduto();
-    carregarCarrinho(); // Esta chamada é essencial para os itens aparecerem ao abrir a página
+    carregarCarrinho();
 </script>
 </body>
 </html>

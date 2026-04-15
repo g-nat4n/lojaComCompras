@@ -1,10 +1,9 @@
 package loja.loja.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 public class Produto {
@@ -17,9 +16,19 @@ public class Produto {
     private double valor;
     private String imagem;
 
+    @ElementCollection
+    private List<String> imagens;
 
 
     public Produto() {
+    }
+
+    public List<String> getImagens() {
+        return imagens;
+    }
+
+    public void setImagens(List<String> imagens) {
+        this.imagens = imagens;
     }
 
     public String getImagem() {

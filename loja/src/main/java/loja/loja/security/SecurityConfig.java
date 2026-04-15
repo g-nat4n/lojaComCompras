@@ -30,7 +30,8 @@ public class SecurityConfig {
                                 "/carrinho/**",
                                 "/registro.html",
                                 "/contato.html",
-                                "/favicon.ico"
+                                "/favicon.ico",
+                                "/admin.html"
                         ).permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/carrinho/**").permitAll()
