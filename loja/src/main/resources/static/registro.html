@@ -2,112 +2,157 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Cadastro</title>
+    <title>Cadastro | Modern Dark</title>
 
     <style>
         body {
-    margin: 0;
-    font-family: 'Segoe UI', Arial;
-    background: linear-gradient(135deg, #1e1e2f, #2c2c54);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+            margin: 0;
+            font-family: 'Segoe UI', Arial;
+            background: #000; /* Cor de fundo caso o vídeo falhe */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Evita barras de rolagem por causa do vídeo */
+        }
 
-/* CARD */
-.container {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    width: 350px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    text-align: center;
-}
+        /* VÍDEO DE FUNDO */
+        #bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1000; /* Garante que fique atrás de tudo */
+            object-fit: cover; /* Faz o vídeo cobrir a tela sem esticar */
+            filter: brightness(40%); /* Deixa o vídeo mais escuro para destacar o formulário */
+        }
 
-/* TITULO */
-.container h2 {
-    margin-bottom: 20px;
-}
+        /* CARD TRANSPARENTE (GLASSMORPHISM) */
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 16px;
+            width: 350px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            z-index: 1;
+        }
 
-/* INPUTS */
-.container input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    outline: none;
-    transition: 0.2s;
-}
+        .container h2 {
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
 
-.container input:focus {
-    border-color: #6c63ff;
-}
+        .container input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+            outline: none;
+            color: white;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
 
-/* BOTAO */
-.container button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 15px;
-    border: none;
-    border-radius: 8px;
-    background: #6c63ff;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-}
+        .container input:focus {
+            border-color: #ffffff;
+            background: rgba(0, 0, 0, 0.5);
+        }
 
-.container button:hover {
-    background: #5848e5;
-}
+        /* BOTAO BRANCO */
+        .container button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #000000;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-/* LINK */
-.container a {
-    display: block;
-    margin-top: 15px;
-    color: #6c63ff;
-    text-decoration: none;
-}
+        .container button:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
 
-.container a:hover {
-    text-decoration: underline;
-}
+        .container a {
+            display: block;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .container a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
     </style>
 </head>
 
 <body>
 
+<video autoplay muted loop id="bg-video">
+    <source src="uploads/video.mp4 " type="video/mp4">
+    Seu navegador não suporta vídeos.
+</video>
+
 <div class="container">
-    <h2>📝 Cadastro</h2>
+    <h2>📝 CADASTRO</h2>
 
-    <input type="text" id="nome" placeholder="Nome">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="senha" placeholder="Senha">
+    <input type="text" id="nome" placeholder="Nome Completo">
+    <input type="email" id="email" placeholder="E-mail">
+    <input type="password" id="senha" placeholder="Crie uma Senha">
 
-    <button onclick="registrar()">Cadastrar</button>
+    <button onclick="registrar()">CADASTRAR</button>
 
-    <a href="login.html">Já tem conta? Entrar</a>
+    <a href="login.html">Já tem conta? Faça Login</a>
 </div>
 
 <script>
     async function registrar() {
-
         const usuario = {
             nome: document.getElementById("nome").value,
             email: document.getElementById("email").value,
             senha: document.getElementById("senha").value
         };
 
-        await fetch("/auth/register", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(usuario)
-        });
+        if(!usuario.nome || !usuario.email || !usuario.senha) {
+            alert("Preencha todos os campos!");
+            return;
+        }
 
-        alert("Cadastro realizado!");
-        window.location.href = "login.html";
+        try {
+            const response = await fetch("http://localhost:8080/auth/register", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(usuario)
+            });
+
+            if(response.ok) {
+                alert("Cadastro realizado com sucesso!");
+                window.location.href = "login.html";
+            } else {
+                alert("Erro ao cadastrar. Tente outro e-mail.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Erro de conexão com o servidor.");
+        }
     }
 </script>
 

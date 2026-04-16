@@ -2,30 +2,53 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Login | Modern Dark</title>
 
     <style>
         body {
             margin: 0;
             font-family: 'Segoe UI', Arial;
-            background: linear-gradient(135deg, #1e1e2f, #2c2c54);
+            background: #000;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
 
+        /* VÍDEO DE FUNDO */
+        #bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1000;
+            object-fit: cover;
+            filter: brightness(35%); /* Um pouco mais escuro para o login */
+        }
+
+        /* CARD TRANSPARENTE */
         .container {
-            background: white;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             padding: 40px;
-            border-radius: 12px;
+            border-radius: 16px;
             width: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            z-index: 1;
         }
 
         .container h2 {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 2px;
         }
 
         .container input {
@@ -33,45 +56,61 @@
             padding: 12px;
             margin: 10px 0;
             border-radius: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
             outline: none;
+            color: white;
+            box-sizing: border-box;
+            transition: 0.3s;
         }
 
         .container input:focus {
-            border-color: #6c63ff;
+            border-color: #ffffff;
+            background: rgba(0, 0, 0, 0.5);
         }
 
+        /* BOTAO BRANCO */
         .container button {
             width: 100%;
             padding: 12px;
-            margin-top: 15px;
+            margin-top: 20px;
             border: none;
             border-radius: 8px;
-            background: #6c63ff;
-            color: white;
+            background: #ffffff;
+            color: #000000;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            transition: 0.3s;
         }
 
         .container button:hover {
-            background: #5848e5;
+            background: #e0e0e0;
+            transform: translateY(-2px);
         }
 
         .container a {
             display: block;
-            margin-top: 15px;
-            color: #6c63ff;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.6);
             text-decoration: none;
-        }
-
-        .erro {
-            color: red;
-            margin-top: 10px;
             font-size: 14px;
         }
 
+        .container a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        .erro {
+            color: #ff4d4d;
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
         .loading {
-            opacity: 0.7;
+            opacity: 0.5;
             pointer-events: none;
         }
     </style>
@@ -79,22 +118,25 @@
 
 <body>
 
-<div class="container" id="box">
-    <h2>🔐 Login</h2>
+<video autoplay muted loop id="bg-video">
+    <source src="uploads/video.mp4 " type="video/mp4">
+</video>
 
-    <input type="email" id="email" placeholder="Email">
+<div class="container" id="box">
+    <h2>🔐 LOGIN</h2>
+
+    <input type="email" id="email" placeholder="E-mail">
     <input type="password" id="senha" placeholder="Senha">
 
-    <button onclick="login()">Entrar</button>
+    <button onclick="login()">ENTRAR</button>
 
     <div class="erro" id="erro"></div>
 
-    <a href="/registro.html">Não tem conta? Cadastre-se</a>
+    <a href="registro.html">Não tem conta? Cadastre-se</a>
 </div>
 
 <script>
     async function login() {
-
         const email = document.getElementById("email").value;
         const senha = document.getElementById("senha").value;
         const erro = document.getElementById("erro");
@@ -102,7 +144,6 @@
 
         erro.innerText = "";
 
-        // validação básica
         if (!email || !senha) {
             erro.innerText = "Preencha todos os campos!";
             return;
@@ -117,36 +158,22 @@
                 body: JSON.stringify({ email, senha })
             });
 
-            if (!response.ok) {
-                throw new Error("Credenciais inválidas");
-            }
+            if (!response.ok) throw new Error("Credenciais inválidas.");
 
             const token = await response.text();
-
-            // valida token
-            if (!token || token.length < 20) {
-                throw new Error("Token inválido");
-            }
-
             localStorage.setItem("token", token);
 
-            // 🔥 TESTE IMEDIATO DO TOKEN
+            // Validação rápida no back-end
             const teste = await fetch("http://localhost:8080/auth/me", {
-                headers: {
-                    "Authorization": "Bearer " + token
-                }
+                headers: { "Authorization": "Bearer " + token }
             });
 
-            if (!teste.ok) {
-                throw new Error("Token não autorizado");
-            }
+            if (!teste.ok) throw new Error("Sessão não autorizada.");
 
-            alert("Login realizado com sucesso!");
             window.location.href = "/index.html";
 
         } catch (e) {
             erro.innerText = e.message;
-            console.error(e);
         } finally {
             box.classList.remove("loading");
         }

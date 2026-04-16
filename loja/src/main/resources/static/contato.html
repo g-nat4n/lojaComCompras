@@ -134,13 +134,59 @@
             background: #008f45;
         }
 
-        /* FOOTER */
-        footer {
-            background: #111;
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
+     footer {
+    background: #111;
+    color: white;
+    padding: 50px 0 20px 0;
+    margin-top: 50px;
+}
+
+.footer-container {
+    width: 80%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.footer-col h4 {
+    color: #3483fa;
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.footer-col p, .footer-col a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.8;
+    display: block;
+}
+
+.footer-col a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    color: #777;
+    font-size: 13px;
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.social-icons span {
+    font-size: 24px;
+    cursor: pointer;
+}
     </style>
 
 </head>
@@ -184,7 +230,37 @@
 
 <!-- FOOTER -->
 <footer>
-    <p>© 2026 Minha Loja - Todos os direitos reservados</p>
+    <div class="footer-container">
+        <div class="footer-col">
+            <h4>📍 Nosso Endereço</h4>
+            <p>Rua Exemplo da Loja, 1234</p>
+            <p>Bairro Centro - Curitiba/PR</p>
+            <p>CEP: 80000-000</p>
+            <p>📞 (41) 9999-9999</p>
+            <p>📧 contato@minhaloja.com</p>
+        </div>
+
+        <div class="footer-col">
+            <h4>🔗 Links Úteis</h4>
+            <a href="#">Minha Conta</a>
+            <a href="#">Meus Pedidos</a>
+            <a href="#">Política de Privacidade</a>
+            <a href="#">Termos de Uso</a>
+            <a href="/contato.html">Fale Conosco</a>
+        </div>
+
+        <div class="footer-col">
+            <h4>📱 Redes Sociais</h4>
+            <div class="social-icons">
+                <span>📸</span> <span>📘</span> <span>🐦</span> <span>🎥</span> </div>
+            <h4 style="margin-top: 20px;">💳 Pagamento</h4>
+            <p>Visa | Mastercard | Pix</p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>Minha Loja © 2026 - Todos os direitos reservados.</p>
+    </div>
 </footer>
 
 </body>
