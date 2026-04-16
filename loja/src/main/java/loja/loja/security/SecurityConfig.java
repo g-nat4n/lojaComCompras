@@ -31,6 +31,7 @@ public class SecurityConfig {
                                 "/registro.html",
                                 "/contato.html",
                                 "/favicon.ico",
+                                "/frete/**",
                                 "/admin.html"
                         ).permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
