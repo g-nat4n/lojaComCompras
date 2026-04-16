@@ -14,7 +14,7 @@
             min-height: 100vh;
         }
 
-        /* --- HEADER COM VÍDEO --- */
+
         header {
             position: relative;
             overflow: hidden;
@@ -102,7 +102,7 @@
             color: #fff;
         }
 
-        /* --- CONTEÚDO DO PRODUTO --- */
+
         .container { width: 90%; max-width: 1200px; margin: 30px auto; }
 
         .produto-box {
@@ -115,7 +115,7 @@
             align-items: flex-start;
         }
 
-        /* Miniaturas Restauradas */
+
         .miniaturas {
             display: flex;
             flex-direction: column;
@@ -186,14 +186,14 @@
         .comprar:hover { background: #2968c8; }
         .carrinho-btn { background: #e3edfb; color: #3483fa; }
 
-        /* Frete */
+
         .frete-box { margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
         .frete-input-group { display: flex; gap: 5px; margin-top: 8px; }
         .frete-input-group input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
         .btn-frete { background: #e3edfb; color: #3483fa; border: none; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .frete-item { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px dashed #eee; }
 
-        /* Grid de Recomendações Restaurado */
+
         .grid-produtos {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -330,7 +330,8 @@
     function authHeader() { return { "Authorization": "Bearer " + localStorage.getItem("token") }; }
     function toggleCarrinho() { document.getElementById("carrinho").classList.toggle("ativo"); }
 
-    // --- CARREGAR PRODUTO (FOTOS CORRIGIDAS) ---
+
+
     async function carregarProduto() {
         if(!id) return;
         const res = await fetch(`${API}/produtos/${id}`);
@@ -365,7 +366,6 @@
         });
     }
 
-    // --- RECOMENDAÇÕES ---
     async function carregarRecomendados() {
         const res = await fetch(`${API}/produtos`);
         const produtos = await res.json();

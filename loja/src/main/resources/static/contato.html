@@ -22,7 +22,7 @@
 header {
     position: relative;
     overflow: hidden;
-    padding: 20px 5% 10px 5%; /* Respiro lateral */
+    padding: 20px 5% 10px 5%;
     color: white;
     min-height: 140px;
     display: flex;
@@ -39,7 +39,7 @@ header {
     z-index: 0;
     transform: translate(-50%, -50%);
     object-fit: cover;
-    filter: brightness(30%); /* Vídeo bem escuro conforme imagem */
+    filter: brightness(30%);
     pointer-events: none;
 }
 
@@ -48,14 +48,14 @@ header {
     z-index: 2;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Distribui Logo, Busca e Login/Carrinho */
+    justify-content: space-between;
     width: 100%;
     gap: 20px;
 }
 
-/* --- DESIGN DO INPUT (IGUAL À IMAGEM) --- */
+
 .busca {
-    flex: 1; /* Ocupa o centro */
+    flex: 1;
     display: flex;
     justify-content: center;
 }
@@ -64,39 +64,39 @@ header {
     position: relative;
     width: 100%;
     max-width: 500px;
-    /* Fundo escuro com borda branca conforme imagem */
+
     border: 1px solid white;
     border-radius: 20px;
-    background: #000; /* Fundo escuro */
-    box-sizing: border-box; /* Garante que a borda não aumente o tamanho */
+    background: #000;
+    box-sizing: border-box;
 }
 
 .input-busca input {
     width: 100%;
-    height: 38px; /* Altura ajustada para caber na borda */
-    padding: 0 45px 0 20px; /* Espaço para a lupa */
-    border: none; /* Remove borda do input interno */
+    height: 38px;
+    padding: 0 45px 0 20px;
+    border: none;
     border-radius: 20px;
     outline: none;
     font-size: 16px;
-    background: transparent; /* Input transparente dentro da div */
-    color: white; /* Texto branco */
+    background: transparent;
+    color: white;
 }
 
 .input-busca button {
     position: absolute;
     right: 5px;
-    top: 4px; /* Ajuste fino vertical */
+    top: 4px;
     height: 30px;
     width: 35px;
     border: none;
     background: transparent;
     font-size: 18px;
     cursor: pointer;
-    color: white; /* Lupa branca */
+    color: white;
 }
 
-/* --- DESIGN DOS BOTÕES DIREITOS (IGUAL À IMAGEM) --- */
+
 .header-right {
     display: flex;
     gap: 15px;
@@ -104,14 +104,14 @@ header {
     min-width: fit-content;
 }
 
-/* Botão de Login (e Sair) no design da imagem */
+
 .btn-login-header {
     text-decoration: none;
     padding: 8px 18px;
-    /* Borda branca e fundo escuro conforme imagem */
+
     border: 1px solid white;
     color: white;
-    background: #000; /* Fundo escuro */
+    background: #000;
     border-radius: 20px;
     font-weight: 600;
     transition: 0.3s;
@@ -121,18 +121,18 @@ header {
 }
 
 .btn-login-header:hover {
-    background: #222; /* Hover sutil */
+    background: #222;
     border-color: #ffffff;
 }
 
-/* Carrinho no design da imagem */
+
 #iconeCarrinho {
     text-decoration: none;
     padding: 8px 18px;
-    /* Borda branca e fundo escuro conforme imagem */
+
     border: 1px solid white;
     color: white;
-    background: #000; /* Fundo escuro */
+    background: #000;
     border-radius: 20px;
     font-weight: 600;
     transition: 0.3s;
@@ -143,11 +143,11 @@ header {
 }
 
 #iconeCarrinho:hover {
-    background: #222; /* Hover sutil */
+    background: #222;
     border-color: #ffffff;
 }
 
-/* --- HOVER DOS LINKS DO MENU (BRANCO FLORESCENTE) --- */
+
 .menu {
     position: relative;
     z-index: 2;
@@ -164,17 +164,17 @@ header {
     font-weight: 500;
     position: relative;
     padding-bottom: 5px;
-    transition: 0.3s ease-in-out; /* Transição suave */
+    transition: 0.3s ease-in-out;
 }
 
-/* Hover fluorescente */
+
 .menu a:hover {
-    color: #ffffff; /* Texto branco no hover */
+    color: #ffffff;
     /* Efeito de brilho externo (Glow) */
     text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff, 0 0 15px #00c3ff, 0 0 20px #00c3ff;
 }
 
-/* Linha que aparece embaixo */
+
 .menu a::after {
     content: '';
     position: absolute;
@@ -190,7 +190,7 @@ header {
     width: 100%;
 }
 
-        /* 🔥 ISSO AQUI É O QUE FALTAVA */
+
         .container {
             width: 80%;
             margin: 40px auto;
